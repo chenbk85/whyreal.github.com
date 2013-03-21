@@ -1,0 +1,79 @@
+Variables
+---------
+scope
+* b:name          variable local to a buffer
+* w:name          variable local to a window
+* s:name          variable local to a script 
+* g:name          global variable (also in a function)
+* v:name          variable predefined by Vim
+
+Here "v:version" is a variable defined by Vim, which has the value of the Vim
+version.  600 is for version 6.0.  Version 6.1 has the value 601.  This is
+very useful to write a script that works with multiple versions of Vim.
+set & unset
+
+    let s:count = 1
+    unlet s:count
+    unlet! s:count   "if don't want an error message, append '!'
+
+When a script finishes, the local variables used there will not be automatically freed. The next time the script execute, it can still use the old value.
+
+check if a variable has already been defined.
+
+    exists(s:count)
+
+Expression
+-----------
+
+    $NAME		environment variable
+    &name		option
+    @r  		register
+
+MATHEMATICS
+-----------
+
+    a + b		add
+    a - b		subtract
+    a * b		multiply
+    a / b		divide
+    a % b		modulo
+
+Borrowed from the C language is the conditional expression:
+
+	a ? b : c
+
+If "a" evaluates to true "b" is used, otherwise "c" is used.  Example: >
+
+The three parts of the constructs are always evaluated first, thus you could
+see it work as:
+
+	(a) ? (b) : (c)
+
+Conditionals
+------------
+
+	:if {condition}
+	   {statements}
+	:endif
+
+	:if {condition}
+	   {statements}
+	:else
+	   {statements}
+	:endif
+
+	:if {condition}
+	   {statements}
+	:elseif {condition}
+	   {statements}
+	:endif
+    
+LOGIC OPERATIONS
+----------------
+
+	a == b		equal to
+	a != b		not equal to
+	a >  b		greater than
+	a >= b		greater than or equal to
+	a <  b		less than
+	a <= b		less than or equal to

@@ -1,0 +1,84 @@
+# Overview
+- Puppet is a [config manage system][1]
+- use erb as template system.
+- can Ruby DSL as config language.
+- c/s architecture
+    - master: fileserver & merge/compile/trans configration & auth manager
+    - client: process the configration
+    - master & client communication based on REST APIs
+
+# config
+
+Configration components:
+
+- Resources – Individual configuration items- Files – Physical files you can serve out to your agents- Templates – Template files that you can use to populate files- Nodes – Specifies the configuration of each agent- Classes – Collections of resources- Definitions – Composite collections of resources
+
+## master 
+config directory structrue:
+
+    $puppet_root/
+        manifests/
+            site.pp    配置文件入口,通常包含node设置        templates/
+            puppet.conf.erb
+        files/
+
+puppet.conf
+
+    [main]    moduledir = /etc/puppet/modules:/var/lib/puppet/modules:/opt/modules 
+
+generate:
+    puppetmasterd --genconfig > puppet.conf       
+
+## module
+
+directory struct:
+
+    mysql    mysql/files/my.cnf        # directory for staticfile
+    mysql/template            # for erb template file    mysql/manifests/init.pp   # directory for config    mysql/manifests/install.pp    mysql/manifests/config.pp
+    mysql/lib                 # for plugin codeinstall.pp:
+    class mysql::install {      package { [ "mysql5", "mysql5client", "mysql5rt", "mysql5test", "mysql5devel" ]:        ensure => present,        require => User["mysql"],      }      user { "mysql":        ensure => present,        comment => "MySQL user",        gid => "mysql",        shell => "/bin/false",        require => Group["mysql"],      }    }
+then, init.pp can include other file like:
+
+    class mysql {      include mysql::install, mysql::config, mysql::service    }
+> - in 'mysql::install', 'mysql' is the module name and a namespace prefix.
+> - 'include' will excute these classes.
+> - require/notify for order executing.
+
+## Scope
+- class 内可以访问全局变量
+- defination的继承包含类变量, 比如node
+- class继承不包含类变量
+
+# Environments
+sperate config for different environments like 'test env', 'product env' …
+
+    [main]      modulepath = $confdir/modules      manifest = $confdir/manifests/site.pp    [development]      modulepath = $confdir/environments/development/modules      manifest = $confdir/environments/development/manifests/site.pp    [testing]      modulepath = $confdir/environments/testing/modules      manifest = $confdir/environments/testing/manifests/site.pp
+
+test:
+
+    $ puppet agent --noop --test --environment testing
+    
+# Scalability
+puppet is just a Ruby application, we can use apache with puppet as a proxy or load-balancer
+
+# externalizing puppet configuration
+node info can be storaged out of puppet config, using like mysql, ldap or just a file.
+
+# Exporting and Storing Configuration
+puppet can storage some data exported by agent into database, so other system like nagios can use.
+
+# Console / UI
+* puppet dashboard
+* foreman
+provide manage/monitor UI for puppet.
+
+# Related tools
+- puppet-module, a puppet module(package) manager
+- puppet ruby dsl, use ruby to write puppet config
+- cucumber, config testing tool
+
+
+[1]: http://en.wikipedia.org/wiki/Configuration_management
+
+# Referance
+- Pro. puppet.pdf

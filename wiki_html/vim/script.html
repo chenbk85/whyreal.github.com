@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>script</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap.min.css">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+
+      @media (max-width: 980px) {
+        /* Enable use of floated navbar text */
+        .navbar-text.pull-right {
+          float: none;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+      }
+    </style>
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap-responsive.min.css">
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#">Real's Notes</a>
+          <div class="nav-collapse collapse">
+            <!-- <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+            </ul> -->
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
+          <div class="well sidebar-nav">
+            <ul id="sidebar" class="nav nav-list">
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span9">
+            
+<p>
+Variables
+<hr />
+scope
+</p>
+<ul>
+<li>
+b:name          variable local to a buffer
+
+<li>
+w:name          variable local to a window
+
+<li>
+s:name          variable local to a script 
+
+<li>
+g:name          global variable (also in a function)
+
+<li>
+v:name          variable predefined by Vim
+
+</ul>
+
+<p>
+Here "v:version" is a variable defined by Vim, which has the value of the Vim
+version.  600 is for version 6.0.  Version 6.1 has the value 601.  This is
+very useful to write a script that works with multiple versions of Vim.
+set &amp; unset
+</p>
+<blockquote>
+let s:count = 1
+unlet s:count
+unlet! s:count   "if don't want an error message, append '!'
+</blockquote>
+
+<p>
+When a script finishes, the local variables used there will not be automatically freed. The next time the script execute, it can still use the old value.
+</p>
+
+<p>
+check if a variable has already been defined.
+</p>
+<blockquote>
+exists(s:count)
+</blockquote>
+
+<p>
+Expression
+<hr />
+</p>
+<blockquote>
+$NAME		environment variable
+&amp;name		option
+@r  		register
+</blockquote>
+
+<p>
+MATHEMATICS
+<hr />
+</p>
+<blockquote>
+a + b		add
+a - b		subtract
+a * b		multiply
+a / b		divide
+a % b		modulo
+</blockquote>
+
+<p>
+Borrowed from the C language is the conditional expression:
+</p>
+
+<p>
+	a ? b : c
+</p>
+
+<p>
+If "a" evaluates to true "b" is used, otherwise "c" is used.  Example: &gt;
+</p>
+
+<p>
+The three parts of the constructs are always evaluated first, thus you could
+see it work as:
+</p>
+
+<p>
+	(a) ? (b) : (c)
+</p>
+
+<p>
+Conditionals
+<hr />
+</p>
+
+<p>
+	:if {condition}
+</p>
+<blockquote>
+{statements}
+</blockquote>
+<p>
+	:endif
+</p>
+
+<p>
+	:if {condition}
+</p>
+<blockquote>
+{statements}
+</blockquote>
+<p>
+	:else
+</p>
+<blockquote>
+{statements}
+</blockquote>
+<p>
+	:endif
+</p>
+
+<p>
+	:if {condition}
+</p>
+<blockquote>
+{statements}
+</blockquote>
+<p>
+	:elseif {condition}
+</p>
+<blockquote>
+{statements}
+</blockquote>
+<p>
+	:endif
+</p>
+    
+<p>
+LOGIC OPERATIONS
+<hr />
+</p>
+
+<p>
+	a == b		equal to
+	a != b		not equal to
+	a &gt;  b		greater than
+	a &gt;= b		greater than or equal to
+	a &lt;  b		less than
+	a &lt;= b		less than or equal to
+</p>
+
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+      </footer>
+
+    </div><!--/.fluid-container-->
+
+    <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../js/bootstrap.js"></script>
+    <script type="text/javascript">
+        (function(){
+            // put toc to sidebar.
+            var li = $(".toc > ul > li"),
+                sidebar = $('#sidebar');
+
+            if(li.length === 0){
+                sidebar.parent().hide();
+            } else {
+                sidebar.append(li)
+                $('ul', sidebar).addClass("nav nav-list");
+                $(".toc").remove();
+            }
+            $("a[href^='http://']").each(function(){
+              this.target = "_blank";
+            });
+        })()
+    </script>
+  </body>
+</html>

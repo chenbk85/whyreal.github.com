@@ -1,0 +1,25 @@
+%toc
+%template default
+
+= 开发 =
+== vim ==
+
+* [[http://learnvimscriptthehardway.stevelosh.com|Learn vim script the hard way]]
+* [[http://www.berlinix.com/vim/vim.php|Berlinix]]
+* [[http://wiki.hotoo.me/Vim.html|闲耘的blog]]
+
+== Python ==
+[[http://pyvideo.org/category/33/pycon-us-2013|PyCon US 2013 video]]
+
+== Sublime ==
+[[./sublime/package_console|install package manager]]
+
+----
+= 配置管理 =
+
+== Salt ==
+* [[./salt/intro|简介]]
+* [[./salt/install|安装]]
+
+= Misc =
+[[./工程师的非技术素养|工程师的非技术素养]]

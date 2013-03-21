@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>puppet</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap.min.css">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+
+      @media (max-width: 980px) {
+        /* Enable use of floated navbar text */
+        .navbar-text.pull-right {
+          float: none;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+      }
+    </style>
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap-responsive.min.css">
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#">Real's Notes</a>
+          <div class="nav-collapse collapse">
+            <!-- <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+            </ul> -->
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
+          <div class="well sidebar-nav">
+            <ul id="sidebar" class="nav nav-list">
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span9">
+            
+<ol>
+<li>
+Overview
+
+<li>
+Puppet is a [config manage system][1]
+
+<li>
+use erb as template system.
+
+<li>
+can Ruby DSL as config language.
+
+<li>
+c/s architecture
+
+<ul>
+<li>
+master: fileserver &amp; merge/compile/trans configration &amp; auth manager
+
+<li>
+client: process the configration
+
+<li>
+master &amp; client communication based on REST APIs
+
+</ul>
+</ol>
+
+<ol>
+<li>
+config
+
+</ol>
+
+<p>
+Configration components:
+</p>
+
+<ul>
+<li>
+Resources – Individual configuration items- Files – Physical files you can serve out to your agents- Templates – Template files that you can use to populate files- Nodes – Specifies the configuration of each agent- Classes – Collections of resources- Definitions – Composite collections of resources
+
+</ul>
+
+<p>
+## master 
+config directory structrue:
+</p>
+<blockquote>
+$puppet_root/
+manifests/
+site.pp    配置文件入口,通常包含node设置        templates/
+puppet.conf.erb
+files/
+</blockquote>
+
+<p>
+puppet.conf
+</p>
+<blockquote>
+[main]    moduledir = /etc/puppet/modules:/var/lib/puppet/modules:/opt/modules 
+</blockquote>
+
+<p>
+generate:
+    puppetmasterd --genconfig &gt; puppet.conf       
+</p>
+
+<p>
+## module
+</p>
+
+<p>
+directory struct:
+</p>
+<blockquote>
+mysql    mysql/files/my.cnf        # directory for staticfile
+mysql/template            # for erb template file    mysql/manifests/init.pp   # directory for config    mysql/manifests/install.pp    mysql/manifests/config.pp
+mysql/lib                 # for plugin codeinstall.pp:
+</blockquote>
+<p>
+    class mysql::install {      package { [ "mysql5", "mysql5client", "mysql5rt", "mysql5test", "mysql5devel" ]:        ensure =&gt; present,        require =&gt; User["mysql"],      }      user { "mysql":        ensure =&gt; present,        comment =&gt; "MySQL user",        gid =&gt; "mysql",        shell =&gt; "/bin/false",        require =&gt; Group["mysql"],      }    }
+then, init.pp can include other file like:
+</p>
+<blockquote>
+class mysql {      include mysql::install, mysql::config, mysql::service    }
+</blockquote>
+<p>
+&gt; - in 'mysql::install', 'mysql' is the module name and a namespace prefix.
+&gt; - 'include' will excute these classes.
+&gt; - require/notify for order executing.
+</p>
+
+<p>
+## Scope
+</p>
+<ul>
+<li>
+class 内可以访问全局变量
+
+<li>
+defination的继承包含类变量, 比如node
+
+<li>
+class继承不包含类变量
+
+</ul>
+
+<ol>
+<li>
+Environments
+
+</ol>
+<p>
+sperate config for different environments like 'test env', 'product env' …
+</p>
+<blockquote>
+[main]      modulepath = \(confdir/modules      manifest = \)confdir/manifests/site.pp    [development]      modulepath = \(confdir/environments/development/modules      manifest = \)confdir/environments/development/manifests/site.pp    [testing]      modulepath = \(confdir/environments/testing/modules      manifest = \)confdir/environments/testing/manifests/site.pp
+</blockquote>
+
+<p>
+test:
+</p>
+<blockquote>
+$ puppet agent --noop --test --environment testing
+</blockquote>
+    
+<ol>
+<li>
+Scalability
+
+</ol>
+<p>
+puppet is just a Ruby application, we can use apache with puppet as a proxy or load-balancer
+</p>
+
+<ol>
+<li>
+externalizing puppet configuration
+
+</ol>
+<p>
+node info can be storaged out of puppet config, using like mysql, ldap or just a file.
+</p>
+
+<ol>
+<li>
+Exporting and Storing Configuration
+
+</ol>
+<p>
+puppet can storage some data exported by agent into database, so other system like nagios can use.
+</p>
+
+<ol>
+<li>
+Console / UI
+
+<li>
+puppet dashboard
+
+<li>
+foreman
+
+</ol>
+<p>
+provide manage/monitor UI for puppet.
+</p>
+
+<ol>
+<li>
+Related tools
+
+<li>
+puppet-module, a puppet module(package) manager
+
+<li>
+puppet ruby dsl, use ruby to write puppet config
+
+<li>
+cucumber, config testing tool
+
+</ol>
+
+
+<p>
+[1]: <a href="http://en.wikipedia.org/wiki/Configuration_management">http://en.wikipedia.org/wiki/Configuration_management</a>
+</p>
+
+<ol>
+<li>
+Referance
+
+<li>
+Pro. puppet.pdf
+
+</ol>
+
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+      </footer>
+
+    </div><!--/.fluid-container-->
+
+    <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../js/bootstrap.js"></script>
+    <script type="text/javascript">
+        (function(){
+            // put toc to sidebar.
+            var li = $(".toc > ul > li"),
+                sidebar = $('#sidebar');
+
+            if(li.length === 0){
+                sidebar.parent().hide();
+            } else {
+                sidebar.append(li)
+                $('ul', sidebar).addClass("nav nav-list");
+                $(".toc").remove();
+            }
+            $("a[href^='http://']").each(function(){
+              this.target = "_blank";
+            });
+        })()
+    </script>
+  </body>
+</html>

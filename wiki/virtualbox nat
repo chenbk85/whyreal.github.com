@@ -1,0 +1,27 @@
+Configuring port forwarding with NAT
+
+As the virtual machine is connected to a private network internal to VirtualBox and invisible to the host, network services on the guest are not accessible to the host machine or to other computers on the same network. However, like a physical router, VirtualBox can make selected services available to the world outside the guest through port forwarding. This means that VirtualBox listens to certain ports on the host and resends all packets which arrive there to the guest, on the same or a different port.
+
+To an application on the host or other physical (or virtual) machines on the network, it looks as though the service being proxied is actually running on the host. This also means that you cannot run the same service on the same ports on the host. However, you still gain the advantages of running the service in a virtual machine -- for example, services on the host machine or on other virtual machines cannot be compromised or crashed by a vulnerability or a bug in the service, and the service can run in a different operating system than the host system.
+
+You can set up a guest service which you wish to proxy using the command line tool VBoxManage; for details, please refer to the section called “VBoxManage modifyvm”.
+
+You will need to know which ports on the guest the service uses and to decide which ports to use on the host (often but not always you will want to use the same ports on the guest and on the host). You can use any ports on the host which are not already in use by a service. For example, to set up incoming NAT connections to an ssh server in the guest, use the following command:
+
+VBoxManage modifyvm "VM name" --natpf1 "guestssh,tcp,,2222,,22"
+With the above example, all TCP traffic arriving on port 2222 on any host interface will be forwarded to port 22 in the guest. The protocol name tcp is a mandatory attribute defining which protocol should be used for forwarding (udp could also be used). The name guestssh is purely descriptive and will be auto-generated if omitted. The number after --natpf denotes the network card, like in other parts of VBoxManage.
+
+To remove this forwarding rule again, use the following command:
+
+VBoxManage modifyvm "VM name" --natpf1 delete "guestssh"
+If for some reason the guest uses a static assigned IP address not leased from the built-in DHCP server, it is required to specify the guest IP when registering the forwarding rule:
+
+VBoxManage modifyvm "VM name" --natpf1 "guestssh,tcp,,2222,10.0.2.19,22"
+This example is identical to the previous one, except that the NAT engine is being told that the guest can be found at the 10.0.2.19 address.
+
+To forward all incoming traffic from a specific host interface to the guest, specify the IP of that host interface like this:
+
+VBoxManage modifyvm "VM name" --natpf1 "guestssh,tcp,127.0.0.1,2222,,22"
+This forwards all TCP traffic arriving on the localhost interface (127.0.0.1) via port 2222 to port 22 in the guest.
+
+It is not possible to configure incoming NAT connections while the VM is running. However, you can change the settings for a VM which is currently saved (or powered off at a snapshot).

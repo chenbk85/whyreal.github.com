@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>mac_vim</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap.min.css">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+
+      @media (max-width: 980px) {
+        /* Enable use of floated navbar text */
+        .navbar-text.pull-right {
+          float: none;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+      }
+    </style>
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap-responsive.min.css">
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#">Real's Notes</a>
+          <div class="nav-collapse collapse">
+            <!-- <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+            </ul> -->
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
+          <div class="well sidebar-nav">
+            <ul id="sidebar" class="nav nav-list">
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span9">
+            
+<ol>
+<li>
+mac &amp; vim
+
+</ol>
+<hr />
+
+<p>
+## install
+<hr />
+</p>
+<ul>
+<li>
+安装xcode, 可以从app store下载, 或者其他随便什么地方. 如果你舍不得2G的硬盘空间来安装这个貌似没什么用的东西, *<strong>请按&lt;cmd+w&gt;</strong>*. 
+
+<li>
+安装command line tools. 启动xcode, Xcode菜单-&gt; perferences选项-&gt;Download页-&gt;点击“command line tool”后面的install. 
+
+<li>
+安装[homebrew](<a href="http://mxcl.github.com/homebrew/)(macport据说已经过时了).">http://mxcl.github.com/homebrew/)(macport据说已经过时了).</a> homebrew是mac上的包管理工具, 类似于yum, apt. 安装过程中如果遇到问题请[猛击](<a href="http://www.google.com).">http://www.google.com).</a> 
+
+<li>
+安装git
+
+</ul>
+<blockquote>
+brew install git
+</blockquote>
+<ul>
+<li>
+安装vim
+
+</ul>
+<blockquote>
+brew install <a href="https://raw.github.com/Homebrew/homebrew-dupes/master/vim.rb">https://raw.github.com/Homebrew/homebrew-dupes/master/vim.rb</a>
+</blockquote>
+<p>
+&gt; os x 10.8 自带的vim已经支持python interface,不需要重新安装.
+</p>
+<blockquote>
+Macvim不支持python插件, 而我选的snip插件是python写的, 所以需要重新安装一个有+python支持的vim. 如果你使用snipMate则不需要重新安装vim. 
+安装完成后, 建议将新安装的vim加入bash path里方便使用.
+</blockquote>
+<ul>
+<li>
+安装[Bunble](<a href="https://github.com/gmarik/vundle),">https://github.com/gmarik/vundle),</a> the plug-in manager for Vim:
+
+</ul>
+<blockquote>
+git clone <a href="https://github.com/gmarik/vundle.git">https://github.com/gmarik/vundle.git</a> ~/.vim/bundle/vundle
+</blockquote>
+
+<p>
+## config
+---
+</p>
+<ul>
+<li>
+将如下配置添加到你的vimrc里
+
+</ul>
+
+<p>
+```
+</p>
+<blockquote>
+set nocompatible               " be iMproved
+filetype off                   " required!
+</blockquote>
+<blockquote>
+set rtp+=~/.vim/bundle/vundle/
+call vundle#rc()
+</blockquote>
+<blockquote>
+" let Vundle manage Vundle
+" required! 
+Bundle 'gmarik/vundle'
+</blockquote>
+<blockquote>
+" My Bundles here:
+"
+" original repos on github
+Bundle 'ervandew/supertab'
+</blockquote>
+<blockquote>
+" vim-scripts repos
+Bundle 'UltiSnips'
+" non github repos
+"Bundle '<a href="git://git.wincent.com/command-t.git'">git://git.wincent.com/command-t.git'</a>
+" ...
+</blockquote>
+<blockquote>
+filetype plugin indent on     " required!
+"
+" Brief help
+" :BundleList          - list configured bundles
+" :BundleInstall(!)    - install(update) bundles
+" :BundleSearch(!) foo - search(or refresh cache first) for foo
+" :BundleClean(!)      - confirm(or auto-approve) removal of unused bundles
+"
+" see :h vundle for more details or wiki for FAQ
+" NOTE: comments after Bundle command are not allowed..
+" supertab
+let g:SuperTabDefaultCompletionType = "context"
+let g:SuperTabContextTextOmniPrecedence = ['&amp;omnifunc', '&amp;completefunc']
+let g:SuperTabDefaultCompletionType = '&lt;c-n&gt;'
+</blockquote>
+<blockquote>
+" UltiSnips
+let g:UltiSnipsExpandTrigger="&lt;tab&gt;"
+let g:UltiSnipsJumpForwardTrigger="&lt;tab&gt;"
+let g:UltiSnipsJumpBackwardTrigger="&lt;s-tab&gt;"
+let g:UltiSnipsDontReverseSearchPath="1"
+let g:UltiSnipsSnippetDirectories = ["snips", "UltiSnips"]
+</blockquote>
+<blockquote>
+" Global configurations
+syntax on
+</blockquote>
+<blockquote>
+set colorcolumn=+1        " highlight column after 'textwidth'
+set textwidth=80
+highlight ColorColumn ctermbg=lightgrey guibg=lightgrey
+</blockquote>
+<p>
+```
+</p>
+
+<ul>
+<li>
+进入vim, 执行如下命令：
+
+</ul>
+<blockquote>
+:BundleInstal
+然后，*<strong>等着……</strong>*Vundle正在帮你安装插件。  
+完成后退出。到此mac上的vim环境部署完成。
+</blockquote>
+
+<p>
+## 插件功能说明
+<hr />
+</p>
+<ul>
+<li>
+Supertab, a plugin which allows you to perform all your insert completion    
+
+</ul>
+<p>
+(ins-completion) using the tab key.  
+简单说就是可以让你用Tab完成各种自动补全.
+</p>
+<ul>
+<li>
+Ultisnips, provide a snippets solution that users came to expect from   
+
+</ul>
+<p>
+editors.  
+提供textMate类似的Bundle功能, 强大的扩展性.
+&gt; 这两个插件绝对NB, 建议看下文档，vim中可以<code>:help supertab</code>, <code>:help UltiSnips</code>
+</p>
+
+<p>
+## PS
+<hr />
+</p>
+<ul>
+<li>
+textMate中还有一些Bundle是用来调用外部命令的, vim这方面不弱, 例如:
+
+</ul>
+<blockquote>
+map &lt;F5&gt; :!node %&lt;CR&gt;
+将这条命令加入<code>.vim/indent/javascript.vim</code>后, 再编辑js文件可以按<code>&lt;F5&gt;</code>执行当前文件的js代码，*<strong>不用vim&lt;-&gt;终端手动切了</strong>*  
+</blockquote>
+<blockquote>
+我的<code>.vim/indent/javascript.vim</code>, 仅供参考：
+</blockquote>
+<blockquote>
+set tabstop=4
+set cindent shiftwidth=4
+set autoindent shiftwidth=4
+set expandtab
+map &lt;F5&gt; :!node %&lt;CR&gt;
+</blockquote>
+<ul>
+<li>
+你可以将<code>.vim</code>放到dropbox里保存。也可以在github.com上开个项目专门放自己的.vim文件(很多人都这么干).
+
+</ul>
+    
+<hr />
+<p>
+Powered by [*<strong>Mou</strong>*,The missing *<strong>Markdown</strong>* editor for web developers](<a href="http://mouapp.com/)">http://mouapp.com/)</a>
+</p>
+
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+      </footer>
+
+    </div><!--/.fluid-container-->
+
+    <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../js/bootstrap.js"></script>
+    <script type="text/javascript">
+        (function(){
+            // put toc to sidebar.
+            var li = $(".toc > ul > li"),
+                sidebar = $('#sidebar');
+
+            if(li.length === 0){
+                sidebar.parent().hide();
+            } else {
+                sidebar.append(li)
+                $('ul', sidebar).addClass("nav nav-list");
+                $(".toc").remove();
+            }
+            $("a[href^='http://']").each(function(){
+              this.target = "_blank";
+            });
+        })()
+    </script>
+  </body>
+</html>

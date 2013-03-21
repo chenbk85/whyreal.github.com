@@ -1,0 +1,32 @@
+# mock
+
+## module
+- buildin module
+
+you can mock directly.
+
+        var fs = require(fs);
+        fs.stat = function () {};
+
+- non-buildin module
+
+you should mock it through modifing require.cache.
+
+        require.cache['**module path**'] = {
+            exports: function (config) {
+                this.config = config;
+            }
+        };
+
+And, if you don't know the path you want to mock, you can require it first, and
+then iterate require.cache.
+
+## property or prototype
+
+        var resolver = new RoleConfigurationResolver();                             
+        resolver.logger_ = {                                                    
+            info: function () {},                                               
+            debug: function () {},                                              
+            warn: function () {},                                               
+            error: function () {}                                               
+        }; 

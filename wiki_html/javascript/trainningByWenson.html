@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>trainningByWenson</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap.min.css">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+
+      @media (max-width: 980px) {
+        /* Enable use of floated navbar text */
+        .navbar-text.pull-right {
+          float: none;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+      }
+    </style>
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap-responsive.min.css">
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#">Real's Notes</a>
+          <div class="nav-collapse collapse">
+            <!-- <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+            </ul> -->
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
+          <div class="well sidebar-nav">
+            <ul id="sidebar" class="nav nav-list">
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span9">
+            
+<p>
+#type
+</p>
+<ul>
+<li>
+value 不可变, 相同的str指向的地址是一致的. 默认情况下跟类没关系, 只在必要时做转换.
+
+<ul>
+<li>
+Numbers(double)
+
+<li>
+Boolean
+
+<li>
+String(utf-8)
+
+<li>
+Date?
+
+</ul>
+</ul>
+<blockquote>
+&gt;typeof 10
+'number'
+&gt;typeof new Number(10)
+'object'
+&gt;var a = 10
+undefined
+&gt;a.constructor
+[Function: Number]
+</blockquote>
+
+<ul>
+<li>
+references
+
+<ul>
+<li>
+Object === dict in python
+
+<li>
+Array 
+
+<ul>
+<li>
+v8
+
+<ul>
+<li>
+Array &lt; 20? // 内存中连续
+
+<li>
+a[10000] = 0; // a === {} 
+
+</ul>
+</ul>
+</ul>
+</ul>
+
+<ol>
+<li>
+control flow
+
+<li>
+for _<em>key</em>_ in
+
+<li>
+operator <code>in</code>
+
+</ol>
+<blockquote>
+&gt; 'a' in {'a':1}
+true
+&gt; ['a'] in ['a']
+false
+</blockquote>
+
+<ol>
+<li>
+function
+
+</ol>
+<p>
+&gt; function in js is *<strong>first class object</strong>*
+</p>
+<blockquote>
+&gt; var f = function(){console.log('');}
+undefined
+&gt; f.constructor
+[Function: Function]
+</blockquote>
+<blockquote>
+&gt; var f = function(){console.log('hello world');}
+undefined
+&gt; (function (print) {print();})(f)
+hello world
+</blockquote>
+
+<ol>
+<li>
+closure
+
+</ol>
+<blockquote>
+var getPrinter = function (prefix) {                
+return function (message) {                                                 
+console.log(prefix + message);                                          
+}                                                                           
+}                                                                               
+</blockquote>
+<blockquote>
+var p = getPrinter('hello'); // --&gt; function
+p(' world'); // --&gt; "hello world"
+-------------------------------------------------
+function getRanger() {                                                         
+var result = []; 
+for(var i = 0; i &lt; 5; i += 1){ 
+result.push(function(){console.log(i)})
+}                                         
+return result;
+}                                                                               
+</blockquote>
+<blockquote>
+for(var index in r) {                                                           
+r[index]();                                                                 
+}                                                                               
+&gt; 5, 5, 5, 5, 5
+-------------------------------------------------
+function getRanger() {                                                          
+var result = []; 
+for(var i = 0; i &lt; 5; i += 1){ 
+( function () { // create a new function    
+var l = i;          
+result.push(function(){console.log(l)})                             
+})();                                                                   
+}                                                                           
+return result;                                                              
+}                                                                               
+</blockquote>
+<blockquote>
+for(var index in r) {                                                           
+r[index]();                                                                 
+}                                                                               
+&gt; 0, 1, 2, 3, 4
+</blockquote>
+    
+<ol>
+<li>
+object-oriented
+
+<li>
+function as class constructor
+
+</ol>
+<blockquote>
+&gt; function Test(){this.message='hello'};
+undefined
+&gt; var a = new Test();
+undefined
+&gt; typeof a
+'object'
+&gt; a.constructor
+[Function: Test]
+</blockquote>
+<blockquote>
+&gt; var a = new Test(); // var t = new Object(); Test.call(t); --&gt; a.message === 'hello'
+&gt; Test(); // global.message === 'hello'
+</blockquote>
+
+<p>
+&gt; 通常js是*<strong>Lexical Scoping</strong><strong>的, 但是this是个特例, 是</strong><strong>Dynamic Scoping</strong>*, this总是指向函数的调用者.
+</p>
+
+<ol>
+<li>
+prototype chain // 继承
+
+</ol>
+<blockquote>
+&gt; Object._<em>proto</em>_
+[Function: Empty]
+&gt; var a
+undefined
+&gt; a._<em>proto</em>_
+TypeError: Cannot read property '_<em>proto</em>_' of null
+&gt; var a = {};
+undefined
+&gt; a._<em>proto</em>_
+{}
+&gt; a._<em>proto</em><em>.</em><em>proto</em>_
+null
+</blockquote>
+
+
+<ol>
+<li>
+null &amp; undefined
+
+<li>
+undefined 未定义, null 已定义但值为空.
+
+</ol>
+<blockquote>
+&gt; typeof null
+'object'
+&gt; typeof undefined
+'undefined'
+</blockquote>
+<ul>
+<li>
+null &amp; undefined has not toString() function
+
+</ul>
+<blockquote>
+&gt; var a = null
+undefined
+&gt; Object.prototype.toString.call(a);
+'[object Null]'
+&gt; a.toString()
+TypeError: Cannot call method 'toString' of null
+</blockquote>
+
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+      </footer>
+
+    </div><!--/.fluid-container-->
+
+    <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../js/bootstrap.js"></script>
+    <script type="text/javascript">
+        (function(){
+            // put toc to sidebar.
+            var li = $(".toc > ul > li"),
+                sidebar = $('#sidebar');
+
+            if(li.length === 0){
+                sidebar.parent().hide();
+            } else {
+                sidebar.append(li)
+                $('ul', sidebar).addClass("nav nav-list");
+                $(".toc").remove();
+            }
+            $("a[href^='http://']").each(function(){
+              this.target = "_blank";
+            });
+        })()
+    </script>
+  </body>
+</html>

@@ -1,0 +1,466 @@
+Emiller's Advanced Topics In Nginx Module Development
+
+By Evan Miller (with Grzegorz Nosek)
+
+DRAFT: August 13, 2009 (changes)
+
+Whereas Emiller's Guide To Nginx Module Development describes the bread-and-butter issues of writing a simple handler, filter, or load-balancer for Nginx, this document covers three advanced topics for the ambitious Nginx developer: shared memory, subrequests, and parsing. Because these are subjects on the boundaries of the Nginx universe, the code here may be sparse. The examples may be out of date. But hopefully, you will make it out not only alive, but with a few extra tools in your belt.
+
+Table of Contents
+
+Shared Memory
+A (fore)word of caution
+Creating and using a shared memory segment
+Using the slab allocator
+Spinlocks, atomic memory access
+Using rbtrees
+Subrequests
+Internal redirect
+A single subrequest
+Sequential subrequests
+Parallel subrequests
+Parsing With Ragel *NEW*
+Installing ragel
+Calling ragel from nginx
+Writing a grammar
+Writing some actions
+Putting it all together
+TODO
+1. Shared Memory
+
+Guest chapter written by Grzegorz Nosek
+
+Nginx, while being unthreaded, allows worker processes to share memory between them. However, this is quite different from the standard pool allocator as the shared segment has fixed size and cannot be resized without restarting nginx or destroying its contents in another way.
+
+1.1. A (fore)word of caution
+
+First of all, caveat hacker. This guide has been written several months after hands-on experience with shared memory in nginx and while I try my best to be accurate (and have spent some time refreshing my memory), in no way is it guaranteed. You've been warned.
+
+Also, 100% of this knowledge comes from reading the source and reverse-engineering the core concepts, so there are probably better ways to do most of the stuff described.
+
+Oh, and this guide is based on 0.6.31, though 0.5.x is 100% compatible AFAIK and 0.7.x also brings no compatibility-breaking changes that I know of.
+
+For real-world usage of shared memory in nginx, see my upstream_fair module.
+
+This probably does not work on Windows at all. Core dumps in the rear mirror are closer than they appear.
+
+1.2. Creating and using a shared memory segment
+
+To create a shared memory segment in nginx, you need to:
+
+provide a constructor function to initialise the segment
+call ngx_shared_memory_add
+These two points contain the main gotchas (that I came across), namely:
+
+Your constructor will be called multiple times and it's up to you to find out whether you're called the first time (and should set something up), or not (and should probably leave everything alone). The prototype for the shared memory constructor looks like:
+
+static ngx_int_t init(ngx_shm_zone_t *shm_zone, void *data);
+The data variable will contain the contents of oshm_zone->data, where oshm_zone is the "old" shm zone descriptor (more about it later). This variable is the only value that can survive a reload, so you must use it if you don't want to lose the contents of your shared memory.
+
+Your constructor function will probably look roughly similar to the one in upstream_fair, i.e.:
+
+static ngx_int_t
+init(ngx_shm_zone_t *shm_zone, void *data)
+{
+        if (data) { /* we're being reloaded, propagate the data "cookie" */
+                shm_zone->data = data;
+                return NGX_OK;
+        }
+
+        /* set up whatever structures you wish to keep in the shm */
+
+        /* initialise shm_zone->data so that we know we have
+        been called; if nothing interesting comes to your mind, try
+        shm_zone->shm.addr or, if you're desperate, (void*) 1, just set
+        the value to something non-NULL for future invocations
+        */
+        shm_zone->data = something_interesting;
+
+        return NGX_OK;
+}
+You must be careful when to access the shm segment.
+
+The interface for adding a shared memory segment looks like:
+
+ngx_shm_zone_t *
+ngx_shared_memory_add(ngx_conf_t *cf, ngx_str_t *name, size_t size,
+        void *tag);
+cf is the reference to the config file (you'll probably create the segment in response to a config option), name is the name of the segment (as a ngx_str_t, i.e. a counted string), size is the size in bytes (which will usually get rounded up to the nearest multiple of the page size, e.g. 4KB on many popular architectures) and tag is a, well, tag for detecting naming conflicts. If you call ngx_shared_memory_add multiple times with the same name, tag and size, you'll get only a single segment. If you specify different names, you'll get several distinct segments and if you specify the same name but different size or tag, you'll get an error. A good choice for the tag value could be e.g. the pointer to your module descriptor.
+
+After you call ngx_shared_memory_add and receive the new shm_zone descriptor, you must set up the constructor in shm_zone->init. Wait... after you add the segment? Yes, and that's a major gotcha. This implies that the segment is not created while calling ngx_shared_memory_add (because you specify the constructor only later). What really happens looks like this (grossly simplified):
+
+parse the whole config file, noting requested shm segments
+
+afterwards, create/destroy all the segments in one go
+
+The constructors are called here. Note that every time your ctor is called, it is with another value of shm_zone. The reason is that the descriptor lives as long as the cycle (generation in Apache terms) while the segment lives as long as the master and all the workers. To let some data survive a reload, you have access to the old descriptor's ->data field (mentioned above).
+
+(re)start workers which begin handling requests
+
+upon receipt of SIGHUP, goto 1
+
+Also, you really must set the constructor, otherwise nginx will consider your segment unused and won't create it at all.
+
+Now that you know it, it's pretty clear that you cannot rely on having access to the shared memory while parsing the config. You can access the whole segment as shm_zone->shm.addr (which will be NULL before the segment gets really created). Any access after the first parsing run (e.g. inside request handlers or on subsequent reloads) should be fine.
+
+1.3. Using the slab allocator
+
+Now that you have your new and shiny shm segment, how do you use it? The simplest way is to use another memory tool that nginx has at your disposal, namely the slab allocator. Nginx is nice enough to initialise the slab for you in every new shm segment, so you can either use it, or ignore the slab structures and overwrite them with your own data.
+
+The interface consists of two functions:
+
+void *ngx_slab_alloc(ngx_slab_pool_t *pool, size_t size);
+void ngx_slab_free(ngx_slab_pool_t *pool, void *p);
+The first argument is simply (ngx_slab_pool_t *)shm_zone->shm.addr and the other one is either the size of the block to allocate, or the pointer to the block to free. (trivia: not once is ngx_slab_free called in vanilla nginx code)
+1.4. Spinlocks, atomic memory access
+
+Remember that shared memory is inherently dangerous because you can have multiple processes accessing it at the same time. The slab allocator has a per-segment lock (shpool->mutex) which is used to protect the segment against concurrent modifications.
+
+You can also acquire and release the lock yourself, which is useful if you want to implement some more complicated operations on the segment, like searching or walking a tree. The two snippets below are essentially equivalent:
+
+/*
+void *new_block;
+ngx_slab_pool_t *shpool = (ngx_slab_pool_t *)shm_zone->shm.addr;
+*/
+
+new_block = ngx_slab_alloc(shpool, ngx_pagesize);
+ngx_shmtx_lock(&shpool->mutex);
+new_block = ngx_slab_alloc_locked(shpool, ngx_pagesize);
+ngx_shmtx_unlock(&shpool->mutex);
+In fact, ngx_slab_alloc looks almost exactly like above.
+If you perform any operations which depend on no new allocations (or, more to the point, frees), protect them with the slab mutex. However, remember that nginx mutexes are implemented as spinlocks (non-sleeping), so while they are very fast in the uncontended case, they can easily eat 100% CPU when waiting. So don't do any long-running operations while holding the mutex (especially I/O, but you should avoid any system calls at all).
+
+You can also use your own mutexes for more fine-grained locking, via the ngx_mutex_init(), ngx_mutex_lock() and ngx_mutex_unlock() functions.
+
+As an alternative for locks, you can use atomic variables which are guaranteed to be read or written in an uninterruptible way (no worker process may see the value halfway as it's being written by another one).
+
+Atomic variables are defined with the type ngx_atomic_t or ngx_atomic_uint_t (depending on signedness). They should have at least 32 bits. To simply read or unconditionally set an atomic variable, you don't need any special constructs:
+
+ngx_atomic_t i = an_atomic_var;
+an_atomic_var = i + 5;
+Note that anything can happen between the two lines; context switches, execution of code on other other CPUs, etc.
+
+To atomically read and modify a variable, you have two functions (very platform-specific) with their interface declared in src/os/unix/ngx_atomic.h:
+
+ngx_atomic_cmp_set(lock, old, new)
+
+Atomically retrieves old value of *lock and stores new under the same address. Returns 1 if *lock was equal to old before overwriting.
+
+ngx_atomic_fetch_add(value, add)
+
+Atomically adds add to *value and returns the old *value.
+
+1.5. Using rbtrees
+
+OK, you have your data neatly allocated, protected with a suitable lock but you'd also like to organise it somehow. Again, nginx has a very nice structure just for this purpose - a red-black tree.
+
+Highlights (API-wise):
+
+requires an insertion callback, which inserts the element in the tree (probably according to some predefined order) and then calls ngx_rbt_red(the_newly_added_node) to rebalance the tree
+requires all leaves to be set to a predefined sentinel object (not NULL)
+This chapter is about shared memory, not rbtrees so shoo! Go read the source for upstream_fair to see creating and walking an rbtree in action.
+
+2. Subrequests
+
+Subrequests are one of the most powerful aspects of Nginx. With subrequests, you can return the results of a different URL than what the client originally requested. Some web frameworks call this an "internal redirect." But Nginx goes further: not only can modules perform multiple subrequests and combine the outputs into a single response, subrequests can perform their own sub-subrequests, and sub-subrequests can initiate sub-sub-subrequests, and... you get the idea. Subrequests can map to files on the hard disk, other handlers, or upstream servers; it doesn't matter from the perspective of Nginx. As far as I know, only filters can issue subrequests.
+
+2.1. Internal redirects
+
+If all you want to do is return a different URL than what the client originally requested, you will want to use the ngx_http_internal_redirect function. Its prototype is:
+
+ngx_int_t
+ngx_http_internal_redirect(ngx_http_request_t *r, ngx_str_t *uri, ngx_str_t *args)
+Where r is the request struct, and uri and args are the new URI. Note that URIs must be locations already defined in nginx.conf; you cannot, for instance, redirect to an arbitrary domain. Handlers should return the return value of ngx_http_internal_redirect, i.e. redirecting handlers will typically end like
+
+return ngx_http_internal_redirect(r, &uri, &args);
+Internal redirects are used in the "index" module (which maps URLs that end in / to index.html) as well as Nginx's X-Accel-Redirect feature.
+
+2.2. A single subrequest
+
+Subrequests are most useful for inserting additional content based on data from the original response. For example, the SSI (server-side include) module uses a filter to scan the contents of the returned document, and then replaces "include" directives with the contents of the specified URLs.
+
+We'll start with a simpler example. We'll make a filter that treats the entire contents of a document as a URL to be retrieved, and then appends the new document to the URL itself. Remember that the URL must be a location in nginx.conf.
+
+static ngx_int_t
+ngx_http_append_uri_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
+{
+    int                 rc; 
+    ngx_str_t           uri;
+    ngx_http_request_t *sr;
+
+    /* First copy the document buffer into the URI string */
+    uri.len = in->buf->last - in->buf->pos;
+    uri.data = ngx_palloc(r->pool, uri.len);
+    if (uri.data == NULL)
+        return NGX_ERROR;
+    ngx_memcpy(uri.data, in->-buf->pos, uri.len);
+
+    /* Now return the original document (i.e. the URI) to the client */
+    rc = ngx_http_next_body_filter(r, in);
+
+    if (rc == NGX_ERROR)
+        return rc;
+
+    /* Finally issue the subrequest */
+    return ngx_http_subrequest(r, &uri, NULL /* args */, 
+        NULL /* callback */, 0 /* flags */);
+}
+The prototype of ngx_http_subrequest is:
+
+ngx_int_t ngx_http_subrequest(ngx_http_request_t *r,
+    ngx_str_t *uri, ngx_str_t *args, ngx_http_request_t **psr, 
+        ngx_http_post_subrequest_t *ps, ngx_uint_t flags)
+Where:
+
+*r is the original request
+*uri and *args refer to the sub-request
+**psr is a reference to a NULL pointer that will point to the new (sub-)request structure
+*ps is a callback for when the subrequest is finished. I've never used this, but see http/ngx_http_request.h for details.
+flags can be a bitwise-OR'ed combination of:
+NGX_HTTP_ZERO_IN_URI: the URI contains a character with ASCII code 0 (also known as '\0'), or contains "%00"
+NGX_HTTP_SUBREQUEST_IN_MEMORY: store the result of the subrequest in a contiguous chunk of memory (usually not necessary)
+The results of the subrequest will be inserted where you expect. If you want to modify the results of the subrequest, you can use another filter (or the same one!). You can tell whether a filter is operating on the primary request or a subrequest with this test:
+
+if (r == r->main) { 
+    /* primary request */
+} else {
+    /* subrequest */
+}
+The simplest example of a module that issues a single subrequest is the "addition" module.
+
+2.3. Sequential subrequests
+
+Note, 8/13/2009: This section may be out of date due to changes in Nginx's subrequest processing introduced in Nginx 0.7.25. Follow at your own risk. -EM
+You might think issuing multiple subrequests is as simple as:
+
+int rc1, rc2, rc3;
+rc1 = ngx_http_subrequest(r, uri1, ...);
+rc2 = ngx_http_subrequest(r, uri2, ...);
+rc3 = ngx_http_subrequest(r, uri3, ...);
+You'd be wrong! Remember that Nginx is single-threaded. Subrequests might need to access the network, and if so, Nginx needs to return to its other work while it waits for a response. So we need to check the return value of ngx_http_subrequest, which can be one of:
+
+NGX_OK: the subrequest finished without touching the network
+NGX_DONE: the client reset the network connection
+NGX_ERROR: there was a server error of some sort
+NGX_AGAIN: the subrequest requires network activity
+If your subrequest returns NGX_AGAIN, your filter should also immediately return NGX_AGAIN. When that subrequest finishes, and the results have been sent to the client, Nginx is nice enough to call your filter again, from which you can issue the next subrequest (or do some work in between subrequests). It helps, of course, to keep track of your planned subrequests in a context struct. You should also take care to return errors immediately, too.
+
+Let's make a simple example. Suppose our context struct contains an array of URIs, and the index of the next subrequest:
+
+typedef struct {
+    ngx_array_t  uris;
+    int          i;
+} my_ctx_t;
+Then a filter that simply concatenates the contents of these URIs together might something look like:
+
+static ngx_int_t
+ngx_http_multiple_uris_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
+{
+    my_ctx_t  *ctx;
+    int rc = NGX_OK;
+    ngx_http_request_t *sr;
+
+    if (r != r->main) { /* subrequest */
+        return ngx_http_next_body_filter(r, in);
+    }
+
+    ctx = ngx_http_get_module_ctx(r, my_module);
+    if (ctx == NULL) {
+        /* populate ctx and ctx->uris here */
+    }
+    while (rc == NGX_OK && ctx->i < ctx->uris.nelts) {
+        rc = ngx_http_subrequest(r, &((ngx_str_t *)ctx->uris.elts)[ctx->i++],
+            NULL /* args */, &sr, NULL /* cb */, 0 /* flags */);
+    }
+
+    return rc; /* NGX_OK/NGX_ERROR/NGX_DONE/NGX_AGAIN */
+}
+Let's think this code through. There might be more going on than you expect.
+
+First, the filter is called on the original response. Based on this response we populate ctx and ctx->uris. Then we enter the while loop and call ngx_http_subrequest for the first time.
+
+If ngx_http_subrequest returns NGX_OK then we move onto the next subrequest immediately. If it returns with NGX_AGAIN, we break out of the while loop and return NGX_AGAIN.
+
+Suppose we've returned an NGX_AGAIN. The subrequest is pending some network activity, and Nginx has moved on to other things. But when that subrequest is finished, Nginx will call our filter at least two more times:
+
+once with r set to the subrequest, and in set to buffers from the subrequest's response
+once with r set to the original request, and in set to NULL
+To distinguish these two cases, we must test whether r == r->main. In this example we call the next filter if we're filtering the subrequest. But if we're in the main request, we'll just pick up the while loop where we last left off. in will be set to NULL because there aren't actually any new buffers to process.
+
+When the last subrequest finishes and all is well, we return NGX_OK.
+
+This example is of course greatly simplified. You'll have to figure out how to populate ctx->uris on your own. But the example shows how simple it is to re-enter the subrequesting loop, and break out as soon as we get an error or NGX_AGAIN.
+
+2.4. Parallel subrequests
+
+It's also possible to issue several subrequests at once without waiting for previous subrequests to finish. This technique is, in fact, too advanced even for Emiller's Advanced Topics in Nginx Module Development. See the SSI module for an example.
+
+3. Parsing with Ragel
+
+If your module is dealing with any kind of input, be it an incoming HTTP header or a full-blown template language, you will need to write a parser. Parsing is one of those things that seems easy—how hard can it be to convert a string into a struct?—but there is definitely a right way to parse and a wrong way to parse. Unfortunately, Nginx sets a bad example by choosing (what I feel is) the wrong way.
+
+What's wrong with Nginx's parsing code?
+
+    /* Random snippet from Nginx parsing code */
+
+   for (p = ctx->pos; p < last; p++) {
+        ch = *p;
+
+        switch (state) {
+            case ssi_tag_state:
+                switch (ch) {
+                    case '!':
+                        /* do stuff */
+                ...
+Nginx does all of its parsing, whether of SSI includes, HTTP headers, or Nginx configuration files, using state machines. A state machine, you might recall from your college Theory of Computation class, reads a tape of characters, moves from state to state based on what it reads, and might perform some action based on what character it reads and what state it is in. So for example, if I wanted to parse positive decimal point numbers with a state machine, I might have a "reading stuff left of the period" state, a "just read a period" state, and a "reading stuff right of the period" state, and move among them as I read in each digit.
+
+Unfortunately, state machine parsers are usually verbose, complex, hard to understand, and hard to modify. From a software development point of view, a better approach is to use a parser generator. A parser generator translates high-level, highly readable parsing rules into a low-level state machine. The compiled code from a parser generator is virtually the same as that of handwritten state machine, but your code is much easier to work with.
+
+There are a number of parser generators available, each with their own special syntaxes, but I am going to focus on one parser generator in particular: Ragel. Ragel is a good choice because it was designed to work with buffered inputs. Given Nginx's buffer-chain architecture, there is a very good chance that you will parsing a buffered input, whether you really want to or not.
+
+3.1. Installing Ragel
+
+Use your system's package manager or else download Ragel from here.
+
+3.2. Calling Ragel from Nginx
+
+It's a good idea to put your parser functions in a separate file from the rest of the module. You will then need to:
+
+Create a header (.h) file for the parser
+Include the header from your module
+Create a Ragel (.rl) file
+Generate a C (.c) file from the Ragel file
+Include the C file in your module config
+The header file should just have prototype for parser functions, which you can include in your module via the usual #include "my_module_parser.h" directive. The real work is writing the Ragel file. We will work through a simple example. The official Ragel User Guide (PDF available here) is fully 56 pages long and gives the programmer tremendous power, but we will just go through the parts of Ragel you really need for a simple parser.
+
+Ragel files are C files interspersed with special Ragel commands and functions. Ragel commands are in blocks of code surrounded by %%{ and }%%. The first two Ragel commands you will want in your parser are:
+
+%%{
+    machine my_parser;
+    write data;
+}%%
+These two commands should appear after any pre-processor directives but before your parser function. The machine command gives a name to the state machine Ragel is about to build for you. The write command will create the state definitions that the state machine will use. Don't worry about these commands too much.
+
+Next you can start writing your parser function as regular C. It can take any arguments you want and should return an ngx_int_t with NGX_OK upon success and NGX_ERROR upon failure. You should pass in, if not a pointer to the input you want to parse, then at least some kind of context struct that contains the input data.
+
+Ragel will create a number of variables implicitly for you. Other variables you need to define yourself in order to use Ragel. At the top of your function, you need to declare:
+
+u_char *p - pointer to the beginning of the input
+u_char *pe - pointer to the end of the input
+int cs - an integer which stores the state machine's state
+Ragel will start its parsing wherever p points, and finish up as soon as it reaches pe. Therefore p and pe should both be pointers on a contiguous chunk of memory. Note that when Ragel is finished running on a particular input, you can save the value of cs (the machine state) and resume parsing on additional input buffers exactly where you left off. In this way Ragel works across multiple input buffers and fits beautifully into Nginx's event-driven architecture.
+
+3.3. Writing a grammar
+
+Next we want to write the Ragel grammar for our parser. A grammar is just a set of rules that specifies which kinds of input are allowed; a Ragel grammar is special because it allows us to perform actions as we scan each character. To take advantage of Ragel, you must learn the Ragel grammar syntax; it is not difficult, but it is not trivial, either.
+
+Ragel grammars are defined by sets of rules. A rule has an arbitrary name on the left side of an equals sign and a specification on the right side, followed by a semicolon. The rule specification is a mixture of regular expressions and actions. We will get to actions in a minute.
+
+The most important rule is called "main." All grammars must have a rule for main. The rule for main is special in that 1) the name is not arbitrary and 2) it uses := instead of = to separate the name from the specification.
+
+Let's start with a simple example: a parser for processing Range requests. This code is adapted from my mod_zip module, which also includes a more complicated parser for processing lists of files, if you are interested.
+
+The "main" rule for our byte range parser is quite simple:
+
+    main := "bytes=" byte_range_set;
+That rule just says "the input should consist of the string bytes= followed by input which follows the rule called byte_range_set." So we need to define the rule byte_range_set:
+
+    byte_range_set = byte_range_specs ( "," byte_range_specs )*;
+That rule just says "byte_range_set consists of a byte_range_specs followed by zero or more commas each followed by a byte_range_specs." In other words, a byte_range_set is a comma-separated list of byte_range_specs's. You might recognize the * as a Kleene star or from regular expressions.
+
+Next we need to define the byte_range_specs rule:
+
+    byte_range_specs = byte_range_spec >new_range;
+The > character is special. It says that new_range is not the name of another rule, but the name of an action, and the action should be taken at the beginning of this rule, i.e. the beginning of byte_range_specs. The most important special characters are:
+
+> - action should be taken at the beginning of this rule
+$ - action should be taken as each character is processed
+% - action should be taken at the end of this rule
+There are others as well, which you can read about in the Ragel User Guide. These are enough to get you started without being too confusing.
+
+Before we get into actions, let's finish defining our rules. In the rule for byte_range_specs (plural), we referred to a rule called byte_range_spec (singular). It is defined as:
+
+    byte_range_spec = [0-9]+ $start_incr
+                      "-"
+                      [0-9]+ $end_incr;
+This rule states "read one or more digits, executing the action start_incr for each, then read a dash, then read one or more digits, executing the action end_incr for each." Notice that no actions are taken at the beginning or end of byte_range_spec.
+
+When you are actually writing a grammar, you should write the rules in reverse order of what I have here. Rules should refer only to other rules that have been previously defined. So "main" should always be the last rule in your grammar, not the first.
+
+Our byte-range grammar is now finished; it's time to specify the actions.
+
+3.4. Writing some actions
+
+Actions are chunks of C code which have access to a few special variables. The most important special variables are:
+
+fc - the current character being read
+fpc - a pointer to the current character being read
+fc is most useful for $ actions, i.e. actions performed on each character of a string or regular expression. fpc is more useful for > and % actions, that is, actions taken at the start or end of a rule.
+
+To return to our byte-range example, here is the new_range action. It does not use any special variables.
+
+    action new_range {
+        if ((range = ngx_array_push(&ctx->ranges)) == NULL) {
+            return NGX_ERROR;
+        }
+        range->start = 0; range->end = 0;
+    }
+new_range is surprisingly dull. It just allocated a new "range" struct on the "ranges" array stored in our context struct. Notice that as long as we include the right header files, Ragel actions have full access to the Nginx API.
+
+Next we define the two remaining actions, start_incr and end_incr. These actions parse positive integers into the appropriate variables. As we read each digit of a number, we want to multiply the stored number by 10 and add the digit. Here we take advantage of the special variable fc described above:
+
+    action start_incr { range->start = range->start * 10 + (fc - '0'); }
+
+    action end_incr { range->end = range->end * 10 + (fc - '0'); }
+Note the old parsing trick of subtracting '0' to convert a character to an integer.
+
+That's it for actions. We are almost finished with our parser.
+
+3.5. Putting it all together
+
+Actions and the grammar should go inside a Ragel block inside your parser function, but after the declarations of p, pe, and cs. I.e., something like:
+
+    ngx_int_t my_parser(/* some context, the request struct, etc. */) 
+    {
+        int cs;
+        u_char *p = ctx->beginning_of_data;
+        u_char *pe = ctx->end_of_data;
+
+        %%{
+            /* Actions */
+            action some_action { /* C code goes here */ }
+            action other_action { /* etc. */ }
+
+            /* Grammar */
+            my_rule = [0-9]+ "-" >some_action;
+            main := ( my_rule )* >other_action;
+
+            write init;
+            write exec;
+        }%%
+
+        if (cs < my_parser_first_final) {
+            return NGX_ERROR;
+        }
+
+        return NGX_OK;
+    }
+We've added a few extra pieces here. The first are write init and write exec. These are commands to Ragel to insert the generated parser (written in C) right there.
+
+The other extra bit is the comparison of cs to my_parser_first_final. Recall that cs stores the parser's state. This check ensures that the parser is in a valid state after it has finished processing input. If we are parsing across multiple input buffers, then instead of this check we will store cs somewhere and retrieve it when we want to continue parsing.
+
+Finally, we are ready to generate the actual parser. The code we've written so far should be in a Ragel (.rl) file; when we're ready to compile, we just run the command:
+
+    ragel my_parser.rl
+This command will produce a file called "my_parser.c". To ensure that it is compiled by Nginx, you then need to add a line to your module's "config" file, like this:
+
+NGX_ADDON_SRCS="$NGX_ADDON_SRCS $ngx_addon_dir/my_parser.c"
+Once you get the hang of parsing with Ragel, you will wonder how you ever did without it. You will actually want to write parsers in your Nginx modules. Ragel opens up a whole new set of possible modules to the imaginative developer.
+
+4. TODO: Advanced Topics Not Yet Covered Here
+
+Topics not yet covered in this guide:
+
+Parallel subrequests
+Built-in data structures (red-black trees, arrays, hash tables...)
+Access control modules

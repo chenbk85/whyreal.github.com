@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>mock</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap.min.css">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+
+      @media (max-width: 980px) {
+        /* Enable use of floated navbar text */
+        .navbar-text.pull-right {
+          float: none;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+      }
+    </style>
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap-responsive.min.css">
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#">Real's Notes</a>
+          <div class="nav-collapse collapse">
+            <!-- <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+            </ul> -->
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
+          <div class="well sidebar-nav">
+            <ul id="sidebar" class="nav nav-list">
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span9">
+            
+<ol>
+<li>
+mock
+
+</ol>
+
+<p>
+## module
+</p>
+<ul>
+<li>
+buildin module
+
+</ul>
+
+<p>
+you can mock directly.
+</p>
+<blockquote>
+var fs = require(fs);
+fs.stat = function () {};
+</blockquote>
+
+<ul>
+<li>
+non-buildin module
+
+</ul>
+
+<p>
+you should mock it through modifing require.cache.
+</p>
+<blockquote>
+require.cache['*<strong>module path</strong>*'] = {
+exports: function (config) {
+this.config = config;
+}
+};
+</blockquote>
+
+<p>
+And, if you don't know the path you want to mock, you can require it first, and
+then iterate require.cache.
+</p>
+
+<p>
+## property or prototype
+</p>
+<blockquote>
+var resolver = new RoleConfigurationResolver();                             
+resolver.logger_ = {                                                    
+info: function () {},                                               
+debug: function () {},                                              
+warn: function () {},                                               
+error: function () {}                                               
+}; 
+</blockquote>
+
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+      </footer>
+
+    </div><!--/.fluid-container-->
+
+    <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../js/bootstrap.js"></script>
+    <script type="text/javascript">
+        (function(){
+            // put toc to sidebar.
+            var li = $(".toc > ul > li"),
+                sidebar = $('#sidebar');
+
+            if(li.length === 0){
+                sidebar.parent().hide();
+            } else {
+                sidebar.append(li)
+                $('ul', sidebar).addClass("nav nav-list");
+                $(".toc").remove();
+            }
+            $("a[href^='http://']").each(function(){
+              this.target = "_blank";
+            });
+        })()
+    </script>
+  </body>
+</html>

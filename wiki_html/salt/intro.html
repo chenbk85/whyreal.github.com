@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>intro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap.min.css">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+
+      @media (max-width: 980px) {
+        /* Enable use of floated navbar text */
+        .navbar-text.pull-right {
+          float: none;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+      }
+    </style>
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap-responsive.min.css">
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#">Real's Notes</a>
+          <div class="nav-collapse collapse">
+            <!-- <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+            </ul> -->
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
+          <div class="well sidebar-nav">
+            <ul id="sidebar" class="nav nav-list">
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span9">
+            
+<h1 id="toc_1">简介</h1>
+
+<ul>
+<li>
+Salt
+
+<ul>
+<li>
+是一个配置管理系统，能够将远程节点维持在指定状态。
+
+<li>
+是一个分布式的远程命令执行系统，能够批量的在远端执行命令或者查询数据，同时可以对节点进行条件筛选。
+
+</ul>
+</ul>
+
+<ul>
+<li>
+简单
+
+<ul>
+<li>
+salt的安装维护都非常简单，而且适用于从几十台到上万台服务器的各种场景。
+
+</ul>
+</ul>
+
+<ul>
+<li>
+并行化
+
+<ul>
+<li>
+salt可以以并行、串行两种方式执行远端命令。
+
+<li>
+使用安全的加密协议通讯
+
+<li>
+尽可能使用最快的也是最经济的网络通讯协议。
+
+<li>
+提供简单的应用程序借口。
+
+</ul>
+</ul>
+
+<ul>
+<li>
+建立在成熟的技术之上
+
+<ul>
+<li>
+网络层使用ZeroMQ，所以Salt包含了一个可用的、透明的AMQ代理。
+
+<li>
+使用秘钥来获取master授权
+
+<li>
+属于使用msgpack进行序列化，以保证快速的、轻量级的通讯。
+
+</ul>
+</ul>
+
+<ul>
+<li>
+python client interface
+
+<ul>
+<li>
+Salt可以通过简单的python脚本扩展
+
+<li>
+远端的执行结果可以返回给master，亦可以发送到任意其他服务器。
+
+<li>
+Salt可以通过命令行调用，也可以通过api调用，所以Salt不但是优秀的工具，可以轻松成为其他更大程序的一部分。
+
+</ul>
+</ul>
+
+<ul>
+<li>
+快速、灵活、并行化
+
+</ul>
+
+<ul>
+<li>
+开源（Apache2.0 licence）
+
+</ul>
+
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+      </footer>
+
+    </div><!--/.fluid-container-->
+
+    <script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../js/bootstrap.js"></script>
+    <script type="text/javascript">
+        (function(){
+            // put toc to sidebar.
+            var li = $(".toc > ul > li"),
+                sidebar = $('#sidebar');
+
+            if(li.length === 0){
+                sidebar.parent().hide();
+            } else {
+                sidebar.append(li)
+                $('ul', sidebar).addClass("nav nav-list");
+                $(".toc").remove();
+            }
+            $("a[href^='http://']").each(function(){
+              this.target = "_blank";
+            });
+        })()
+    </script>
+  </body>
+</html>

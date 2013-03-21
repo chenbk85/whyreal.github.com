@@ -1,0 +1,133 @@
+#type
+* value 不可变, 相同的str指向的地址是一致的. 默认情况下跟类没关系, 只在必要时做转换.
+    * Numbers(double)
+    * Boolean
+    * String(utf-8)
+    * Date?
+    
+            >typeof 10
+            'number'
+            >typeof new Number(10)
+            'object'
+            >var a = 10
+            undefined
+            >a.constructor
+            [Function: Number]
+
+* references
+    * Object === dict in python
+    * Array 
+        * v8
+            * Array < 20? // 内存中连续
+            * a[10000] = 0; // a === {} 
+
+# control flow
+* for __key__ in
+* operator `in`
+    
+        > 'a' in {'a':1}
+        true
+        > ['a'] in ['a']
+        false
+
+# function
+> function in js is **first class object**
+
+    > var f = function(){console.log('');}
+    undefined
+    > f.constructor
+    [Function: Function]
+    
+    > var f = function(){console.log('hello world');}
+    undefined
+    > (function (print) {print();})(f)
+    hello world
+
+# closure
+
+    var getPrinter = function (prefix) {                
+        return function (message) {                                                 
+            console.log(prefix + message);                                          
+        }                                                                           
+    }                                                                               
+    
+    var p = getPrinter('hello'); // --> function
+    p(' world'); // --> "hello world"
+    -------------------------------------------------
+    function getRanger() {                                                         
+        var result = []; 
+        for(var i = 0; i < 5; i += 1){ 
+            result.push(function(){console.log(i)})
+        }                                         
+        return result;
+    }                                                                               
+                                                                                    
+    for(var index in r) {                                                           
+        r[index]();                                                                 
+    }                                                                               
+    > 5, 5, 5, 5, 5
+    -------------------------------------------------
+    function getRanger() {                                                          
+        var result = []; 
+        for(var i = 0; i < 5; i += 1){ 
+            ( function () { // create a new function    
+                var l = i;          
+                result.push(function(){console.log(l)})                             
+            })();                                                                   
+        }                                                                           
+        return result;                                                              
+    }                                                                               
+                                                                                    
+    for(var index in r) {                                                           
+        r[index]();                                                                 
+    }                                                                               
+    > 0, 1, 2, 3, 4
+    
+# object-oriented
+* function as class constructor
+
+        > function Test(){this.message='hello'};
+        undefined
+        > var a = new Test();
+        undefined
+        > typeof a
+        'object'
+        > a.constructor
+        [Function: Test]
+        
+        > var a = new Test(); // var t = new Object(); Test.call(t); --> a.message === 'hello'
+        > Test(); // global.message === 'hello'
+
+> 通常js是**Lexical Scoping**的, 但是this是个特例, 是**Dynamic Scoping**, this总是指向函数的调用者.
+
+# prototype chain // 继承
+
+    > Object.__proto__
+    [Function: Empty]
+    > var a
+    undefined
+    > a.__proto__
+    TypeError: Cannot read property '__proto__' of null
+    > var a = {};
+    undefined
+    > a.__proto__
+    {}
+    > a.__proto__.__proto__
+    null
+
+
+# null & undefined
+* undefined 未定义, null 已定义但值为空.
+
+        > typeof null
+        'object'
+        > typeof undefined
+        'undefined'
+* null & undefined has not toString() function
+    
+        > var a = null
+        undefined
+        > Object.prototype.toString.call(a);
+        '[object Null]'
+        > a.toString()
+        TypeError: Cannot call method 'toString' of null
