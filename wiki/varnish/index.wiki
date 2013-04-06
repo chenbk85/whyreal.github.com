@@ -1,0 +1,36 @@
+%toc
+%title Varnish
+
+= cookie =
+默认情况下varnish不会对cookie/set-cookie头做特殊处理，会正常缓存。但是一旦缓存了则会导致用户串号这样的恶性故障。这一点需要开发&运维提高警惕。
+
+关于vanish对cookie的处理，官方文档有详细的说明，以下是文档中给出的最佳实践：
+
+{{{
+9.4 Best practices for cookies
+
+Remove all cookies you know you do not need, then cache if none are left.
+
+Use URL schemes that let you easily determine if a page needs a cookie or not. E.g:
+
+• /common/ - strip all cookies.
+• /user/ - Leave user-cookies.
+• /voucher/ - Only leave the voucher-cookie. • etc.
+
+Once you have a URL scheme that works, add the req.http.cookie to the cache hash in vcl_hash: hash_data(req.http.cookie);.
+
+Never cache a Set-Cookie header. Either remove the header before caching or don't cache the object at all.
+
+Avoid using return (deliver); more than once in vcl_fetch. Instead, finish up with something similar to:
+
+
+if (beresp.ttl > 0s) {
+    unset beresp.http.set-cookie;
+} 
+
+This will ensure that all cached pages are stripped of set-cookie.
+
+A golden rule through all of this is: It's far better to either NOT cache or cache multiple copies of the same content for each user than it is to deliver the wrong content to the wrong person.
+
+Your worst-case scenario should be a broken cache and overloaded web servers, not a compromised user-account and a lawsuit.
+}}}

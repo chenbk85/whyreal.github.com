@@ -1,0 +1,61 @@
+%toc
+%title Lua/ngx_lua
+
+-----------
+= Lua =
+http://www.lua.org
+[[http://lua-users.org/wiki/LuaStyleGuide| Lua Style Guide]]
+
+== Package ==
+
+* _REQUIREDNAME 已经过时了, Lua 5.1之后 require 会将模块名传递给被加载的模块。同时增加了module函数来方便模块定义，可以采用以下方式定义模块：
+    * 最原始的方式：
+    {{{
+    -- module setup
+    local modname = ...
+    local M = {}
+    _G[modname] = M
+    package.loaded[modname] = M
+
+    -- Import Section:
+    -- declare everything this module needs from outside
+    local sqrt = math.sqrt
+    local io = io
+
+    -- no more external access after this point
+    setfenv(1, M)
+    }}}
+    * 最简单的方式：
+    {{{
+    module(..., package.seeall)
+    }}}
+    等价于：
+    {{{
+    setmetatable(M, {__index = _G})
+    }}}
+    这种方式效率上稍有损失
+    * 简单&高效
+    {{{
+    -- Import Section:
+    -- declare everything this module needs from outside
+    local sqrt = math.sqrt
+    local io = io
+
+    module(...)
+    }}}
+
+* require 默认不会重复加载相同的模块,如果要强制重新加载，可以：
+{{{
+package.loaded["foo"] = nil
+require "foo"
+}}}
+* require 搜索的路径是一系列的模式匹配，如果是：
+    ?:?.lua:/usr/?.lua:/usr/?/?.lua
+    那么，require "foo" 会尝试打开以下文件：
+    ./foo
+    ./foo.lua
+    /usr/foo.lua
+    /usr/foo/foo.lua
+* 搜索路径保存在package.path中，lua启动时会用LUA_PATH环境变量初始化该变量。
+* package.cpath search C lib
+

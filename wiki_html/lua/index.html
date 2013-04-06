@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>%title%</title>
+    <title>Lua/ngx_lua</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -12,8 +12,8 @@
     <link rel="Stylesheet" type="text/css" href="http://lib.sinaapp.com/js/bootstrap/latest/css/bootstrap.min.css">
     <link rel="Stylesheet" type="text/css" href="http://lib.sinaapp.com/js/bootstrap/latest/css/bootstrap-responsive.min.css">
     -->
-    <link rel="Stylesheet" type="text/css" href="%root_path%css/bootstrap-responsive.min.css">
-    <link rel="Stylesheet" type="text/css" href="%root_path%css/bootstrap.min.css">
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap-responsive.min.css">
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap.min.css">
     <style type="text/css">
       body {
         padding-top: 60px;
@@ -41,7 +41,7 @@
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">
-          <a class="brand" href="%root_path%index.html">Real's Notes</a>
+          <a class="brand" href="../index.html">Real's Notes</a>
           <div class="nav-collapse collapse">
             <!-- <ul class="nav">
               <li class="active"><a href="#">Home</a></li>
@@ -60,7 +60,97 @@
           </div><!--/.well -->
         </div><!--/span-->
         <div class="span6">
-            %content%
+            
+<div class="toc">
+<ul>
+<li><a href="#toc_1">Lua</a>
+<ul>
+<li><a href="#toc_1.1">Package</a>
+</ul>
+</ul>
+</div>
+
+<hr />
+<h1 id="toc_1">Lua</h1>
+<p>
+<a href="http://www.lua.org">http://www.lua.org</a>
+</p>
+
+<h2 id="toc_1.1">Package</h2>
+
+<ul>
+<li>
+_REQUIREDNAME 已经过时了, Lua 5.1之后 require 会将模块名传递给被加载的模块。同时增加了module函数来方便模块定义，可以采用以下方式定义模块：
+
+<ul>
+<li>
+最原始的方式：
+<pre>
+    -- module setup
+    local modname = ...
+    local M = {}
+    _G[modname] = M
+    package.loaded[modname] = M
+
+    -- Import Section:
+    -- declare everything this module needs from outside
+    local sqrt = math.sqrt
+    local io = io
+
+    -- no more external access after this point
+    setfenv(1, M)
+</pre>
+
+<li>
+最简单的方式：
+<pre>
+    module(..., package.seeall)
+</pre>
+<br />    等价于：
+<pre>
+    setmetatable(M, {__index = _G})
+</pre>
+<br />    这种方式效率上稍有损失
+
+<li>
+简单&amp;高效
+<pre>
+    -- Import Section:
+    -- declare everything this module needs from outside
+    local sqrt = math.sqrt
+    local io = io
+
+    module(...)
+</pre>
+
+</ul>
+</ul>
+
+<ul>
+<li>
+require 默认不会重复加载相同的模块,如果要强制重新加载，可以：
+<pre>
+package.loaded["foo"] = nil
+require "foo"
+</pre>
+
+<li>
+require 搜索的路径是一系列的模式匹配，如果是：
+<br />    ?:?.lua:/usr/?.lua:/usr/?/?.lua
+<br />    那么，require "foo" 会尝试打开以下文件：
+<br />    ./foo
+<br />    ./foo.lua
+<br />    /usr/foo.lua
+<br />    /usr/foo/foo.lua
+
+<li>
+搜索路径保存在package.path中，lua启动时会用LUA_PATH环境变量初始化该变量。
+
+<li>
+package.cpath search C lib
+
+</ul>
+
         </div><!--/span-->
       </div><!--/row-->
 

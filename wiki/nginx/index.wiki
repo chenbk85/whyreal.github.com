@@ -1,0 +1,17 @@
+%toc
+%title nginx
+
+* [[http://wiki.nginx.org/Main|Nginx wiki]]
+
+= 常用配置 =
+== location ==
+符号：
+* = 绝对匹配(非正则)
+* ^~ 匹配开头（非正则）
+* ~ 大小写敏感的匹配
+* ~* 忽略大小写的匹配
+
+匹配顺序：
+# =
+# ^~
+# location在配置文件中的顺序

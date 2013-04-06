@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>%title%</title>
+    <title>Ngx_lua</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -12,8 +12,8 @@
     <link rel="Stylesheet" type="text/css" href="http://lib.sinaapp.com/js/bootstrap/latest/css/bootstrap.min.css">
     <link rel="Stylesheet" type="text/css" href="http://lib.sinaapp.com/js/bootstrap/latest/css/bootstrap-responsive.min.css">
     -->
-    <link rel="Stylesheet" type="text/css" href="%root_path%css/bootstrap-responsive.min.css">
-    <link rel="Stylesheet" type="text/css" href="%root_path%css/bootstrap.min.css">
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap-responsive.min.css">
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap.min.css">
     <style type="text/css">
       body {
         padding-top: 60px;
@@ -41,7 +41,7 @@
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">
-          <a class="brand" href="%root_path%index.html">Real's Notes</a>
+          <a class="brand" href="../index.html">Real's Notes</a>
           <div class="nav-collapse collapse">
             <!-- <ul class="nav">
               <li class="active"><a href="#">Home</a></li>
@@ -60,7 +60,79 @@
           </div><!--/.well -->
         </div><!--/span-->
         <div class="span6">
-            %content%
+            
+<div class="toc">
+<ul>
+<li><a href="#toc_1">Ngx_lua</a>
+<ul>
+<li><a href="#toc_1.1">ngx.var</a>
+</ul>
+</ul>
+</div>
+
+<h1 id="toc_1">Ngx_lua</h1>
+<blockquote>
+Nginx不单单是一个web server，更是一个开发框架，有了openresty之后更加是这样。尤其对于非开发工程师而言，以前只能想想的东西，现在终于有能力实现了。
+<strong>Nginx插件应该优先选择ngx_lua开发，一个字：快！。</strong>
+</blockquote>
+
+<ul>
+<li>
+<a href="http://wiki.nginx.org/HttpLuaModule">ngx_lua</a>
+
+<li>
+<a href="http://openresty.org">OpenResty</a>
+
+<li>
+自己的练手项目：<a href="https://github.com/whyreal/play_with_ngxlua">play with ngx_lua</a>
+
+</ul>
+
+<h2 id="toc_1.1">ngx.var</h2>
+<p>
+<a href="http://wiki.nginx.org/HttpCoreModule#Variables">http://wiki.nginx.org/HttpCoreModule#Variables</a>
+</p>
+
+<p>
+example:
+</p>
+<pre>
+curl /lua/a=1&amp;b=1
+
+arg_PARAMETER: 
+args: a=1&amp;b=1
+binary_remote_addr: 
+body_bytes_sent: 0
+content_length: 
+content_type: 
+cookie_COOKIE: 
+document_root: /usr/local/nginx/nginx/html
+document_uri: /lua
+host: localhost
+hostname: ubuntu-real
+http_HEADER: 
+is_args: ?
+limit_rate: 0
+nginx_version: 1.2.6
+query_string: a=1&amp;b=1
+remote_addr: 10.0.2.2
+remote_port: 60814
+remote_user: 
+request_filename: /usr/local/nginx/nginx/html/lua
+request_body: 
+request_body_file: 
+request_completion: 
+request_method: GET
+request_uri: /lua?a=1&amp;b=1
+scheme: http
+sent_http_HEADER: 
+server_addr: 10.0.2.15
+server_name: localhost
+server_port: 80
+server_protocol: HTTP/1.1
+uri: /lua
+</pre>
+
         </div><!--/span-->
       </div><!--/row-->
 

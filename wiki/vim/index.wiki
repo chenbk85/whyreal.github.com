@@ -1,0 +1,115 @@
+%toc
+%title Vim
+
+-------
+= Mac & Vim =
+
+== Install,,Just for new mac,, ==
+
+# 安装xcode, 可以从app store下载, 或者其他随便什么地方. 如果你舍不得2G的硬盘空间来安装这个貌似没什么用的东西, **请按<cmd+w>**.
+# 安装command line tools. 启动xcode, Xcode菜单-> perferences选项->Download页->点击“command line tool”后面的install. 
+# 安装 [[http://mxcl.github.com/homebrew/|homebrew]], homebrew是mac上的包管理工具, 类似于yum, apt
+# 安装git
+
+    `brew install git`
+
+# 安装vim
+
+    `brew install macvim`
+
+    OSX v10.8 自带的vim已经支持python interface,不需要重新安装.
+
+* 安装Bundle, The plug-in manager for Vim:
+
+    `git clone https://github.com/gmarik/vundle.git ~/.vim/bundle/vundle`
+
+----
+== 常用插件 ==
+* Supertab, a plugin which allows you to perform all your insert completion (ins-completion) using the tab key.
+    简单说就是可以让你用Tab完成各种自动补全.
+* Ultisnips, 提供textMate类似的Bundle功能, 强大的扩展性.
+* syntastic, 静态语法检查， 支持多种语言，可定制。
+* FuzzyFinder, 可以帮你查找各种：buffer, file, help, tag...
+* The-NERD-tree, 目录树导航
+* vimwiki, 基于vim的wiki系统，很好用。
+* VOoM, 根据文件内容生成目录, 效果类似The-NERD-tree, 只不过是针对单个文件的.
+* L9, 一个基础函数库，部分插件依赖该库。
+* zencoding-vim, 编写html，css的神器！
+* AutoComplPop，制动弹出补全菜单
+
+------------
+= Vim script =
+
+== Variables ==
+scope
+* b:name          variable local to a buffer
+* w:name          variable local to a window
+* s:name          variable local to a script 
+* g:name          global variable (also in a function)
+* v:name          variable predefined by Vim
+
+When a script finishes, the local variables used there will not be automatically freed. The next time the script execute, it can still use the old value.
+
+Check if a variable has already been defined.
+
+    exists(s:count)
+
+== Expression ==
+
+|       |                      |
+|-------|----------------------|
+| $NAME | environment variable |
+|-------|----------------------|
+| &name | option               |
+|-------|----------------------|
+| @r    | register             |
+
+== MATHEMATICS ==
+
+| a + b | add      |
+| a - b | subtract |
+| a * b | multiply |
+| a / b | divide   |
+| a % b | modulo   |
+
+三元运算:
+    a ? b : c
+
+== Conditionals ==
+
+{{{
+:if {condition}
+   {statements}
+:endif
+
+:if {condition}
+   {statements}
+:else
+   {statements}
+:endif
+
+:if {condition}
+   {statements}
+:elseif {condition}
+   {statements}
+:endif
+}}}
+
+== LOGIC OPERATIONS ==
+
+| a == b | equal to                 |
+| a != b | not equal to             |
+| a >  b | greater than             |
+| a >= b | greater than or equal to |
+| a <  b | less than                |
+| a <= b | less than or equal to    |
+
+= Links =
+-------
+
+* [[https://github.com/whyreal/dotfiles/blob/master/vimrc|我的配置]]
+* [[http://learnvimscriptthehardway.stevelosh.com|Learn vim script the hard way]]
+* [[http://www.berlinix.com/vim/vim.php|Berlinix]]
+* [[http://wiki.hotoo.me/Vim.html|闲耘的blog]]
+* [[http://beiyuu.com/]]
+

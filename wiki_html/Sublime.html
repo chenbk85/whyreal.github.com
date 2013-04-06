@@ -2,13 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>install</title>
+    <title>Sublime</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
 
     <!-- Le styles -->
+    <!--
     <link rel="Stylesheet" type="text/css" href="http://lib.sinaapp.com/js/bootstrap/latest/css/bootstrap.min.css">
+    <link rel="Stylesheet" type="text/css" href="http://lib.sinaapp.com/js/bootstrap/latest/css/bootstrap-responsive.min.css">
+    -->
+    <link rel="Stylesheet" type="text/css" href="css/bootstrap-responsive.min.css">
+    <link rel="Stylesheet" type="text/css" href="css/bootstrap.min.css">
     <style type="text/css">
       body {
         padding-top: 60px;
@@ -27,7 +32,6 @@
         }
       }
     </style>
-    <link rel="Stylesheet" type="text/css" href="http://lib.sinaapp.com/js/bootstrap/latest/css/bootstrap-responsive.min.css">
     <script type="text/javascript"
         src="http://lib.sinaapp.com/js/jquery/1.9.0/jquery.min.js"></script>
   </head>
@@ -37,12 +41,7 @@
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">
-          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="brand" href="#">Real's Notes</a>
+          <a class="brand" href="index.html">Real's Notes</a>
           <div class="nav-collapse collapse">
             <!-- <ul class="nav">
               <li class="active"><a href="#">Home</a></li>
@@ -54,58 +53,29 @@
 
     <div class="container-fluid">
       <div class="row-fluid">
-        <div class="span2">
+        <div class="span3">
           <div class="well sidebar-nav">
             <ul id="sidebar" class="nav nav-list">
             </ul>
           </div><!--/.well -->
         </div><!--/span-->
-        <div class="span9">
+        <div class="span6">
             
-<p>
-The latest Salt Stack packages are available in a PPA. The steps below demonstrate how to add the PPA and install the Salt Stack packages.
-</p>
+<div class="toc">
+<ul>
+<li><a href="#toc_1">Package manager</a>
+</ul>
+</div>
 
-<pre>
-sudo apt-get install python-software-properties
-sudo add-apt-repository -y ppa:saltstack/salt
-</pre>
+<h1 id="toc_1">Package manager</h1>
+<ol>
+<li>
+ctrl+\`
 
-<p>
-Once the repository has been configured you’ll need to refresh your package cache.
-</p>
+<li>
+import urllib2,os;pf='Package Control.sublime-package';ipp=sublime.installed_packages_path();os.makedirs(ipp) if not os.path.exists(ipp) else None;open(os.path.join(ipp,pf),'wb').write(urllib2.urlopen('<a href="http://sublime.wbond.net/'+pf.replace('">http://sublime.wbond.net/'+pf.replace('</a> ','%20')).read())
 
-<p>
-<code>sudo apt-get update</code>
-</p>
-
-<p>
-Now you should be ready to install the Salt Stack packages. Salt Stack is broken up into three different packages: salt-master, salt-minion and salt-syndic.
-</p>
-
-<p>
-Salt Master
-</p>
-
-<p>
-<code>sudo apt-get install salt-master</code>
-</p>
-
-<p>
-Salt Minion
-</p>
-
-<p>
-<code>sudo apt-get install salt-minion</code>
-</p>
-
-<p>
-Salt Syndic
-</p>
-
-<p>
-<code>sudo apt-get install salt-syndic</code>
-</p>
+</ol>
 
         </div><!--/span-->
       </div><!--/row-->
@@ -117,9 +87,8 @@ Salt Syndic
 
     </div><!--/.fluid-container-->
 
-    <script type="text/javascript" src="http://lib.sinaapp.com/?path=bootstrap/latest/js/bootstrap.min.js"></script>
     <script type="text/javascript">
-        $(function(){
+        (function(){
             // put toc to sidebar.
             var li = $(".toc > ul > li"),
                 sidebar = $('#sidebar');
@@ -131,10 +100,14 @@ Salt Syndic
                 $('ul', sidebar).addClass("nav nav-list");
                 $(".toc").remove();
             }
-            $("a[href^='http://']").each(function(){
-              this.target = "_blank";
+            $("a[href^='http']").each(function(){
+              $(this).attr('target', '_blank').append('<i class="icon-share"><i>');
             });
-        });
+            $("table").addClass("table table-bordered");
+        })();
     </script>
+    <script type="text/javascript" src="http://lib.sinaapp.com/?path=bootstrap/latest/js/bootstrap.min.js"></script>
+    <script
+        src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js?skin=sons-of-obsidian"></script>
   </body>
 </html>

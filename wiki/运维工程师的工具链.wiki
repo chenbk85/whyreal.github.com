@@ -1,0 +1,39 @@
+%toc
+%title 运维工程师的工具链
+
+= 我对运维工具理解 =
+在我的观念里运维工程师在日常工作中对于工具的需求主要集中在两方面：Push & Pull。
+* Push
+    指人为要求服务器执行某些变更，以达到标准状态。也就是远程执行工具。 最最常见的远程执行工具莫过于ssh了，而且可以说是万能。但是貌似大多数公司都在想方设法的限制ssh的使用。不过没关系，工具还有很多，比如Func，Puppet的亲兄弟[[https://puppetlabs.com/mcollective/introduction/|MCollective]], 当然还有salt。
+* Pull
+    指服务器自动监测服务器状态，如果有必要则主动变更，向标准状态靠拢。也就是通常说的配置管理工具。 这类型的工具也有很多，比如：老牌的cfengine，比较流行的[[https://puppetlabs.com|puppet]]、chef，还有新贵[[http://saltstack.org|salt]]。这些都是不错的选择。
+
+有了这两类工具，一方面服务器知道自己应该干什么，而且会不停的检测，相当于将服务器环境锁定，一定程度上避免了因为人为操作而导致的故障。同时，也为工程师管理大规模集群提供了可能。另一方面，遇到紧急情况工程师也可以快速对服务器批量执行操作，在处理故障的时候这很有用。
+
+= Devops-toolchain =
+当下，作为一名运维工程师，如果没听说过devops（敏捷运维）的应该检讨以下了。其实我也只是一知半解。
+
+不同的人对于devops有不同的理解，侧重的方向也不一样。有人喜欢把devops和ITIL放在一起说事儿。讨论些管理、流程方面的事情。但是，相对来讲我更关心的是devops-toolchain。
+
+开发工程师很早就有自己的工具链：编辑器，编译器，debugger。。。但是最为苦逼的运维工程师。。。不过情况在慢慢的好转。[[http://www.slideshare.net/socializedsoftware/open-source-tool-chains-for-cloud-computing|Open Source Tool Chains for Cloud Computing]]这个ppt有些年头了，不过里面对于运维工具的分类及选择很值得学习。
+
+devops-toolschain将运维工具分为几块：系统部署、配置管理、监控。这里我又加了一个远程执行（其实应该算作是配置管理的一部分）。
+
+== 系统部署 ==
+* 由于有了配置管理系统的强大支撑，系统部署可以相对简单点，最小安装即可（当然得把配置管理系统装上，否则就会陷入“先有鸡还是先有蛋”的怪圈）。
+
+== 配置管理 ==
+* 配置管理的自动化水平 与 可以容忍的基础设施的差异化水平成正比。
+* 配置管理工具实际上提供了对服务器软硬件环境的抽象。
+* 配置管理的配置应该是面向服务的，而非面向资源。不要被文档中大量的细节所迷惑。
+* 魔法：模板。
+
+== 远程执行 ==
+* 需要对常用命令封装，尽量不要直接执行shell命令。
+
+== 监控 ==
+* nagios与其说是监控系统，还不如说是个报警框架。我们可以用其他系统做信息收集，用nagios对处理过的数据进行监控。这样可以监控趋势，而不是简单的监控状态。
+
+= Links =
+* [[http://www.slideshare.net/jallspaw/10-deploys-per-day-dev-and-ops-cooperation-at-flickr|10+ Deploys Per Day: Dev and Ops Cooperation at Flickr]]
+* [[http://www.slideshare.net/jedi4ever/code-but-not-as-we-know-it-infrastructure-as-code|Code but not as we know it - Infrastructure as code]]

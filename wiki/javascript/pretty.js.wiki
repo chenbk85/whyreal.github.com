@@ -1,0 +1,67 @@
+%toc
+[[https://google-code-prettify.googlecode.com/|offical]]
+
+= Auto load =
+{{{class="prettyprint lang-html"
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js?skin=sons-of-obsidian"></script>
+}}}
+
+= Example =
+{{{class="prettyprint lang-html"
+<pre class="prettyprint lang-html linenums">
+    code...
+</pre>
+}}}
+
+= Language list =
+{{{class="prettyprint lang--"
+lang-aliases
+lang-apollo
+lang-basic
+lang-c
+lang-cc
+lang-cl
+lang-clj
+lang-coffee
+lang-cpp
+lang-cs
+lang-css
+lang-dart
+lang-el
+lang-erlang
+lang-foo
+lang-go
+lang-handler
+lang-hs
+lang-html
+lang-in
+lang-java
+lang-js
+lang-lisp
+lang-llvm
+lang-lsp
+lang-lua
+lang-matlab
+lang-ml
+lang-mumps
+lang-n
+lang-nemerle
+lang-pascal
+lang-proto
+lang-py
+lang-r
+lang-rd
+lang-regex
+lang-scala
+lang-scm
+lang-sh
+lang-sql
+lang-tcl
+lang-tex
+lang-uq
+lang-vb
+lang-vhdl
+lang-wiki
+lang-xq
+lang-yaml
+}}}

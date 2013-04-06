@@ -1,0 +1,54 @@
+%toc
+%title Ngx_lua
+
+= Ngx_lua =
+    Nginx不单单是一个web server，更是一个开发框架，有了openresty之后更加是这样。尤其对于非开发工程师而言，以前只能想想的东西，现在终于有能力实现了。
+    *Nginx插件应该优先选择ngx_lua开发，一个字：快！。*
+
+* [[http://wiki.nginx.org/HttpLuaModule|ngx_lua]]
+* [[http://openresty.org|OpenResty]]
+* 自己的练手项目：[[https://github.com/whyreal/play_with_ngxlua|play with ngx_lua]]
+
+== ngx.var ==
+http://wiki.nginx.org/HttpCoreModule#Variables
+
+example:
+{{{
+curl /lua/a=1&b=1
+
+arg_PARAMETER: 
+args: a=1&b=1
+binary_remote_addr: 
+body_bytes_sent: 0
+content_length: 
+content_type: 
+cookie_COOKIE: 
+document_root: /usr/local/nginx/nginx/html
+document_uri: /lua
+host: localhost
+hostname: ubuntu-real
+http_HEADER: 
+is_args: ?
+limit_rate: 0
+nginx_version: 1.2.6
+query_string: a=1&b=1
+remote_addr: 10.0.2.2
+remote_port: 60814
+remote_user: 
+request_filename: /usr/local/nginx/nginx/html/lua
+request_body: 
+request_body_file: 
+request_completion: 
+request_method: GET
+request_uri: /lua?a=1&b=1
+scheme: http
+sent_http_HEADER: 
+server_addr: 10.0.2.15
+server_name: localhost
+server_port: 80
+server_protocol: HTTP/1.1
+uri: /lua
+}}}
+
+
+

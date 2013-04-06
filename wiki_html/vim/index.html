@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vim</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <!--
+    <link rel="Stylesheet" type="text/css" href="http://lib.sinaapp.com/js/bootstrap/latest/css/bootstrap.min.css">
+    <link rel="Stylesheet" type="text/css" href="http://lib.sinaapp.com/js/bootstrap/latest/css/bootstrap-responsive.min.css">
+    -->
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap-responsive.min.css">
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap.min.css">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+
+      @media (max-width: 980px) {
+        /* Enable use of floated navbar text */
+        .navbar-text.pull-right {
+          float: none;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+      }
+    </style>
+    <script type="text/javascript"
+        src="http://lib.sinaapp.com/js/jquery/1.9.0/jquery.min.js"></script>
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="brand" href="../index.html">Real's Notes</a>
+          <div class="nav-collapse collapse">
+            <!-- <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+            </ul> -->
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span3">
+          <div class="well sidebar-nav">
+            <ul id="sidebar" class="nav nav-list">
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span6">
+            
+<div class="toc">
+<ul>
+<li><a href="#toc_1">Mac &amp; Vim</a>
+<ul>
+<li><a href="#toc_1.1">Install<sub><small>Just for new mac</small></sub></a>
+<li><a href="#toc_1.2">常用插件</a>
+</ul>
+<li><a href="#toc_2">Vim script</a>
+<ul>
+<li><a href="#toc_2.1">Variables</a>
+<li><a href="#toc_2.2">Expression</a>
+<li><a href="#toc_2.3">MATHEMATICS</a>
+<li><a href="#toc_2.4">Conditionals</a>
+<li><a href="#toc_2.5">LOGIC OPERATIONS</a>
+</ul>
+<li><a href="#toc_3">Links</a>
+</ul>
+</div>
+
+<hr />
+<h1 id="toc_1">Mac &amp; Vim</h1>
+
+<h2 id="toc_1.1">Install<sub><small>Just for new mac</small></sub></h2>
+
+<ol>
+<li>
+安装xcode, 可以从app store下载, 或者其他随便什么地方. 如果你舍不得2G的硬盘空间来安装这个貌似没什么用的东西, *<strong>请按&lt;cmd+w&gt;</strong>*.
+
+<li>
+安装command line tools. 启动xcode, Xcode菜单-&gt; perferences选项-&gt;Download页-&gt;点击“command line tool”后面的install. 
+
+<li>
+安装 <a href="http://mxcl.github.com/homebrew/">homebrew</a>, homebrew是mac上的包管理工具, 类似于yum, apt
+
+<li>
+安装git
+
+</ol>
+<blockquote>
+<code>brew install git</code>
+</blockquote>
+
+<ol>
+<li>
+安装vim
+
+</ol>
+<blockquote>
+<code>brew install macvim</code>
+</blockquote>
+<blockquote>
+OSX v10.8 自带的vim已经支持python interface,不需要重新安装.
+</blockquote>
+
+<ul>
+<li>
+安装Bundle, The plug-in manager for Vim:
+
+</ul>
+<blockquote>
+<code>git clone https://github.com/gmarik/vundle.git ~/.vim/bundle/vundle</code>
+</blockquote>
+
+<hr />
+<h2 id="toc_1.2">常用插件</h2>
+<ul>
+<li>
+Supertab, a plugin which allows you to perform all your insert completion (ins-completion) using the tab key.
+<br />    简单说就是可以让你用Tab完成各种自动补全.
+
+<li>
+Ultisnips, 提供textMate类似的Bundle功能, 强大的扩展性.
+
+<li>
+syntastic, 静态语法检查， 支持多种语言，可定制。
+
+<li>
+FuzzyFinder, 可以帮你查找各种：buffer, file, help, tag...
+
+<li>
+The-NERD-tree, 目录树导航
+
+<li>
+vimwiki, 基于vim的wiki系统，很好用。
+
+<li>
+VOoM, 根据文件内容生成目录, 效果类似The-NERD-tree, 只不过是针对单个文件的.
+
+<li>
+L9, 一个基础函数库，部分插件依赖该库。
+
+<li>
+zencoding-vim, 编写html，css的神器！
+
+<li>
+AutoComplPop，制动弹出补全菜单
+
+</ul>
+
+<hr />
+<h1 id="toc_2">Vim script</h1>
+
+<h2 id="toc_2.1">Variables</h2>
+<p>
+scope
+</p>
+<ul>
+<li>
+b:name          variable local to a buffer
+
+<li>
+w:name          variable local to a window
+
+<li>
+s:name          variable local to a script 
+
+<li>
+g:name          global variable (also in a function)
+
+<li>
+v:name          variable predefined by Vim
+
+</ul>
+
+<p>
+When a script finishes, the local variables used there will not be automatically freed. The next time the script execute, it can still use the old value.
+</p>
+
+<p>
+Check if a variable has already been defined.
+</p>
+<blockquote>
+exists(s:count)
+</blockquote>
+
+<h2 id="toc_2.2">Expression</h2>
+
+<table>
+<tr>
+<th>
+&nbsp;
+</th>
+<th>
+&nbsp;
+</th>
+</tr>
+<tr>
+<th>
+$NAME
+</th>
+<th>
+environment variable
+</th>
+</tr>
+<tr>
+<th>
+&amp;name
+</th>
+<th>
+option
+</th>
+</tr>
+<tr>
+<td>
+@r
+</td>
+<td>
+register
+</td>
+</tr>
+</table>
+
+<h2 id="toc_2.3">MATHEMATICS</h2>
+
+<table>
+<tr>
+<td>
+a + b
+</td>
+<td>
+add
+</td>
+</tr>
+<tr>
+<td>
+a - b
+</td>
+<td>
+subtract
+</td>
+</tr>
+<tr>
+<td>
+a * b
+</td>
+<td>
+multiply
+</td>
+</tr>
+<tr>
+<td>
+a / b
+</td>
+<td>
+divide
+</td>
+</tr>
+<tr>
+<td>
+a % b
+</td>
+<td>
+modulo
+</td>
+</tr>
+</table>
+
+<p>
+三元运算:
+</p>
+<blockquote>
+a ? b : c
+</blockquote>
+
+<h2 id="toc_2.4">Conditionals</h2>
+
+<pre>
+:if {condition}
+   {statements}
+:endif
+
+:if {condition}
+   {statements}
+:else
+   {statements}
+:endif
+
+:if {condition}
+   {statements}
+:elseif {condition}
+   {statements}
+:endif
+</pre>
+
+<h2 id="toc_2.5">LOGIC OPERATIONS</h2>
+
+<table>
+<tr>
+<td>
+a == b
+</td>
+<td>
+equal to
+</td>
+</tr>
+<tr>
+<td>
+a != b
+</td>
+<td>
+not equal to
+</td>
+</tr>
+<tr>
+<td>
+a &gt;  b
+</td>
+<td>
+greater than
+</td>
+</tr>
+<tr>
+<td>
+a &gt;= b
+</td>
+<td>
+greater than or equal to
+</td>
+</tr>
+<tr>
+<td>
+a &lt;  b
+</td>
+<td>
+less than
+</td>
+</tr>
+<tr>
+<td>
+a &lt;= b
+</td>
+<td>
+less than or equal to
+</td>
+</tr>
+</table>
+
+<h1 id="toc_3">Links</h1>
+<hr />
+
+<ul>
+<li>
+<a href="https://github.com/whyreal/dotfiles/blob/master/vimrc">我的配置</a>
+
+<li>
+<a href="http://learnvimscriptthehardway.stevelosh.com">Learn vim script the hard way</a>
+
+<li>
+<a href="http://www.berlinix.com/vim/vim.php">Berlinix</a>
+
+<li>
+<a href="http://wiki.hotoo.me/Vim.html">闲耘的blog</a>
+
+<li>
+<a href="http://beiyuu.com/">http://beiyuu.com/</a>
+
+</ul>
+
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+      </footer>
+
+    </div><!--/.fluid-container-->
+
+    <script type="text/javascript">
+        (function(){
+            // put toc to sidebar.
+            var li = $(".toc > ul > li"),
+                sidebar = $('#sidebar');
+
+            if(li.length === 0){
+                sidebar.parent().hide();
+            } else {
+                sidebar.append(li)
+                $('ul', sidebar).addClass("nav nav-list");
+                $(".toc").remove();
+            }
+            $("a[href^='http']").each(function(){
+              $(this).attr('target', '_blank').append('<i class="icon-share"><i>');
+            });
+            $("table").addClass("table table-bordered");
+        })();
+    </script>
+    <script type="text/javascript" src="http://lib.sinaapp.com/?path=bootstrap/latest/js/bootstrap.min.js"></script>
+    <script
+        src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js?skin=sons-of-obsidian"></script>
+  </body>
+</html>

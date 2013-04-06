@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>%title%</title>
+    <title>Varnish</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -12,8 +12,8 @@
     <link rel="Stylesheet" type="text/css" href="http://lib.sinaapp.com/js/bootstrap/latest/css/bootstrap.min.css">
     <link rel="Stylesheet" type="text/css" href="http://lib.sinaapp.com/js/bootstrap/latest/css/bootstrap-responsive.min.css">
     -->
-    <link rel="Stylesheet" type="text/css" href="%root_path%css/bootstrap-responsive.min.css">
-    <link rel="Stylesheet" type="text/css" href="%root_path%css/bootstrap.min.css">
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap-responsive.min.css">
+    <link rel="Stylesheet" type="text/css" href="../css/bootstrap.min.css">
     <style type="text/css">
       body {
         padding-top: 60px;
@@ -41,7 +41,7 @@
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">
-          <a class="brand" href="%root_path%index.html">Real's Notes</a>
+          <a class="brand" href="../index.html">Real's Notes</a>
           <div class="nav-collapse collapse">
             <!-- <ul class="nav">
               <li class="active"><a href="#">Home</a></li>
@@ -60,7 +60,51 @@
           </div><!--/.well -->
         </div><!--/span-->
         <div class="span6">
-            %content%
+            
+<div class="toc">
+<ul>
+<li><a href="#toc_1">cookie</a>
+</ul>
+</div>
+
+<h1 id="toc_1">cookie</h1>
+<p>
+默认情况下varnish不会对cookie/set-cookie头做特殊处理，会正常缓存。但是一旦缓存了则会导致用户串号这样的恶性故障。这一点需要开发&amp;运维提高警惕。
+</p>
+
+<p>
+关于vanish对cookie的处理，官方文档有详细的说明，以下是文档中给出的最佳实践：
+</p>
+
+<pre>
+9.4 Best practices for cookies
+
+Remove all cookies you know you do not need, then cache if none are left.
+
+Use URL schemes that let you easily determine if a page needs a cookie or not. E.g:
+
+• /common/ - strip all cookies.
+• /user/ - Leave user-cookies.
+• /voucher/ - Only leave the voucher-cookie. • etc.
+
+Once you have a URL scheme that works, add the req.http.cookie to the cache hash in vcl_hash: hash_data(req.http.cookie);.
+
+Never cache a Set-Cookie header. Either remove the header before caching or don't cache the object at all.
+
+Avoid using return (deliver); more than once in vcl_fetch. Instead, finish up with something similar to:
+
+
+if (beresp.ttl &gt; 0s) {
+    unset beresp.http.set-cookie;
+} 
+
+This will ensure that all cached pages are stripped of set-cookie.
+
+A golden rule through all of this is: It's far better to either NOT cache or cache multiple copies of the same content for each user than it is to deliver the wrong content to the wrong person.
+
+Your worst-case scenario should be a broken cache and overloaded web servers, not a compromised user-account and a lawsuit.
+</pre>
+
         </div><!--/span-->
       </div><!--/row-->
 

@@ -1,25 +1,33 @@
 %toc
 %template default
+%title Real's Notes
 
-= 开发 =
-== vim ==
+%% 好东西 http://www.slideshare.net/search/slideshow?searchfrom=header&q=Infrastructure
 
-* [[http://learnvimscriptthehardway.stevelosh.com|Learn vim script the hard way]]
-* [[http://www.berlinix.com/vim/vim.php|Berlinix]]
-* [[http://wiki.hotoo.me/Vim.html|闲耘的blog]]
+----------
+= Dev =
+== Language ==
+* [[./javascript/index|Javascript]]||[[./html_css/index|HTML/CSS]]||[[http://www.w3schools.com|w3cshools]]
+* [[./python/index|Python]]
+* [[./lua/index|Lua]]
+* [[./ngx_lua/index|Ngx_lua]]
+* [[http://www.dartlang.org/|Dart]]
 
-== Python ==
-[[http://pyvideo.org/category/33/pycon-us-2013|PyCon US 2013 video]]
+== Editor ==
+* [[./vim/index|Vim]]
+* [[Sublime]]
 
-== Sublime ==
-[[./sublime/package_console|install package manager]]
+---------
+= Ops =
+* [[运维工程师的工具链]]
+* [[Salt]]
+* [[./nginx/index|Nginx]]
+* [[./varnish/index|Varnish]]
+* [[sshfs]]
+* [[shell]]
 
-----
-= 配置管理 =
-
-== Salt ==
-* [[./salt/intro|简介]]
-* [[./salt/install|安装]]
-
-= Misc =
-[[./工程师的非技术素养|工程师的非技术素养]]
+-------------
+= Team =
+* [[scrum tools]]
+* [[工程师的非技术素养]]
+* [[http://www.infoq.com/cn/presentations/Form-powerful-team#3970668-tsina-1-57674-4940258fac58681d93622513463cbd0b|建一只强大的小团队 by @左耳朵耗子]]
