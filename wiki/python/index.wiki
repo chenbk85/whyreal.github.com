@@ -1,1 +1,26 @@
+%toc
+%title Python
+
+= Library =
+
+== urllib2 ==
+
+=== urllib2.HTTPError ===
+2.7中添加了urllib2.HTTPError.reason, 2.6中是没有的，之前一直很纠结2.6中怎么获取reason。
+结果。。。我漏掉了文档中的一句话：
+
+    Though being an exception (a subclass of URLError), an HTTPError can also function as a non-exceptional file-like return value (the same thing that urlopen() returns).
+
+urllib2.HTTPError同时也是一个文件对象。。。换句话说，是可以read的。
+所以我的问题简单了：
+{{{
+try:
+    r = opener.open(request).read()
+    return r
+except urllib2.HTTPError as e:
+    print e.code
+    print e.read()   # 我就是想要这个
+}}}
+
+= Links =
 [[http://pyvideo.org/category/33/pycon-us-2013|PyCon US 2013 video]]

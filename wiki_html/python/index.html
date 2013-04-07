@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>index</title>
+    <title>Python</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -61,6 +61,46 @@
         </div><!--/span-->
         <div class="span6">
             
+<div class="toc">
+<ul>
+<li><a href="#toc_1">Library</a>
+<ul>
+<li><a href="#toc_1.1">urllib2</a>
+<ul>
+<li><a href="#toc_1.1.1">urllib2.HTTPError</a>
+</ul>
+</ul>
+<li><a href="#toc_2">Links</a>
+</ul>
+</div>
+
+<h1 id="toc_1">Library</h1>
+
+<h2 id="toc_1.1">urllib2</h2>
+
+<h3 id="toc_1.1.1">urllib2.HTTPError</h3>
+<p>
+2.7中添加了urllib2.HTTPError.reason, 2.6中是没有的，之前一直很纠结2.6中怎么获取reason。
+结果。。。我漏掉了文档中的一句话：
+</p>
+<blockquote>
+Though being an exception (a subclass of URLError), an HTTPError can also function as a non-exceptional file-like return value (the same thing that urlopen() returns).
+</blockquote>
+
+<p>
+urllib2.HTTPError同时也是一个文件对象。。。换句话说，是可以read的。
+所以我的问题简单了：
+</p>
+<pre>
+try:
+    r = opener.open(request).read()
+    return r
+except urllib2.HTTPError as e:
+    print e.code
+    print e.read()   # 我就是想要这个
+</pre>
+
+<h1 id="toc_2">Links</h1>
 <p>
 <a href="http://pyvideo.org/category/33/pycon-us-2013">PyCon US 2013 video</a>
 </p>
